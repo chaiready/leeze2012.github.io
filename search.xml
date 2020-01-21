@@ -1,0 +1,1161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>Maven 打包将 system 的文件添加到 war 中</title>
+    <url>/post/63dee017.html</url>
+    <content><![CDATA[<h4 id="文章背景"><a href="#文章背景" class="headerlink" title="文章背景"></a>文章背景</h4><div class="note info no-icon">
+            <p>在个人的工作中使用了百度的编辑器的jar文件，但是在阿里云的maven镜像中是没有这个文件的，以前自己的私服里面有这个文件。<br>后面使用，<scope>system</scope> 添加后发现不能打包的war文件中。<br>对于国内的互联网的资料，我个人的意见是能用 English 的还是用这样的方式去查询吧。</p>
+          </div>
+
+<a id="more"></a>
+
+<h4 id="基础姿势"><a href="#基础姿势" class="headerlink" title="基础姿势"></a>基础姿势</h4><div class="note info no-icon">
+            <p>个人在网络上寻找到的资料很多都是使用 spring-boot-maven-plugin 的 plugin ，首先我们来了解下作用域：</p><ul><li>compile 默认的scope，表示 dependency 都可以在生命周期中使用。而且，这些dependencies 会传递到依赖的项目中。适用于所有阶段，会随着项目一起发布</li><li>provided 跟compile相似，但是表明了dependency 由JDK或者容器提供，例如Servlet AP和一些Java EE APIs。这个scope 只能作用在编译和测试时，同时没有传递性。</li><li>runtime 表示dependency不作用在编译时，但会作用在运行和测试时，如JDBC驱动，适用运行和测试阶段。</li><li>test 表示dependency作用在测试时，不作用在运行时。 只在测试时使用，用于编译和运行测试代码。不会随项目发布。</li><li>system 跟provided 相似，但是在系统中要以外部JAR包的形式提供，maven不会在repository查找它。</li></ul>
+          </div>
+
+<br>
+
+<blockquote>
+<p>下面添加一个解决依赖冲突的办法，这个是题外话。</p>
+</blockquote>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 这里是举个栗子，我们在添加别人写好的工具类的时候，会自动依赖很多jar，并且和项目本身的jar有冲突，用这个可以解决。其他是本地一定有引用这个jar文件 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>junit<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>junit<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.12<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">exclusions</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">exclusion</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>hamcrest-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.hamcrest<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">exclusion</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">exclusions</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h4><blockquote>
+<p>这边先给出spring-boot-maven-plugin的配置，至于能不能将本地 jar 打入 war 中自己测试（实践出真知）：</p>
+</blockquote>
+<figure class="highlight dust"><table><tr><td class="code"><pre><span class="line"><span class="xml"><span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-maven-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>$</span><span class="template-variable">&#123;spring-boot.version&#125;</span><span class="xml"><span class="tag">&lt;/<span class="name">version</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">includeSystemScope</span>&gt;</span>true<span class="tag">&lt;/<span class="name">includeSystemScope</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span></span><br><span class="line"><span class="xml"><span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>以下是我本地使用的百度的UE编辑器的jar</p>
+</blockquote>
+<figure class="highlight dust"><table><tr><td class="code"><pre><span class="line"><span class="xml"><span class="comment">&lt;!-- 百度的编辑器，这个在自己的私服上面，如果要使用的话需要配置 --&gt;</span></span></span><br><span class="line"><span class="xml"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.baidu<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>ueditor<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.1.2<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">scope</span>&gt;</span>system<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">systemPath</span>&gt;</span>$</span><span class="template-variable">&#123;project.basedir&#125;</span><span class="xml">/libs/ueditor-1.1.2.jar<span class="tag">&lt;/<span class="name">systemPath</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span></span><br><span class="line"><span class="xml"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="xml"><span class="comment">&lt;!-- 记得这个地方要添加版本的，反正我很奇怪没有添加版本是正常运行了 --&gt;</span></span></span><br><span class="line"><span class="xml"><span class="tag">&lt;<span class="name">build</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">plugins</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span></span><br><span class="line"><span class="xml">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span></span><br><span class="line"><span class="xml">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-war-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span></span><br><span class="line"><span class="xml">            <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span></span><br><span class="line"><span class="xml">                <span class="tag">&lt;<span class="name">webResources</span>&gt;</span></span></span><br><span class="line"><span class="xml">                    <span class="tag">&lt;<span class="name">resource</span>&gt;</span></span></span><br><span class="line"><span class="xml">                        <span class="tag">&lt;<span class="name">directory</span>&gt;</span>$</span><span class="template-variable">&#123;project.basedir&#125;</span><span class="xml">/libs<span class="tag">&lt;/<span class="name">directory</span>&gt;</span></span></span><br><span class="line"><span class="xml">                        <span class="tag">&lt;<span class="name">targetPath</span>&gt;</span>WEB-INF/lib<span class="tag">&lt;/<span class="name">targetPath</span>&gt;</span></span></span><br><span class="line"><span class="xml">                        <span class="tag">&lt;<span class="name">filtering</span>&gt;</span>true<span class="tag">&lt;/<span class="name">filtering</span>&gt;</span></span></span><br><span class="line"><span class="xml">                        <span class="tag">&lt;<span class="name">includes</span>&gt;</span></span></span><br><span class="line"><span class="xml">                            <span class="tag">&lt;<span class="name">include</span>&gt;</span>**/*.jar<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span></span><br><span class="line"><span class="xml">                        <span class="tag">&lt;/<span class="name">includes</span>&gt;</span></span></span><br><span class="line"><span class="xml">                    <span class="tag">&lt;/<span class="name">resource</span>&gt;</span></span></span><br><span class="line"><span class="xml">                <span class="tag">&lt;/<span class="name">webResources</span>&gt;</span></span></span><br><span class="line"><span class="xml">            <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;/<span class="name">plugins</span>&gt;</span></span></span><br><span class="line"><span class="xml"><span class="tag">&lt;/<span class="name">build</span>&gt;</span></span></span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>maven</category>
+      </categories>
+      <tags>
+        <tag>maven</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>linux之使用alternatives 切换Java版本</title>
+    <url>/post/4824a74d.html</url>
+    <content><![CDATA[<p> xception in thread “main” java.lang.UnsupportedClassVersionError: M : Unsupported major.minor version</p>
+<p>在linux上编译的java程序，在运行的时候报这个错误。</p>
+<a id="more"></a>
+
+<p>经过查找原来是javac的版本和java的版本不一致导致的，</p>
+<p>因为我机器上安装了系统自带的java-1.5.0-gcj和1.7.0的openjdk，另外我还自己安装了1.8.0的Oracle 官方的jdk</p>
+<p>导致编译器的版本和运行器的版本不一致。</p>
+<p>解决这个问题的方法是使用alternatives 切换默认的java命令</p>
+<p>这个工具的大概原理是</p>
+<p>在/usr/bin目录下创建一个符号链接，指向/etc/alternatives/ 下的的文件，而该文件依然是一个符号链接，举个栗子</p>
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">[<span class="symbol">root@</span>node1 mec]# ll /usr/bin/java</span><br><span class="line">lrwxrwxrwx. <span class="number">1</span> root root <span class="number">22</span> <span class="number">4</span>月  <span class="number">16</span> <span class="number">16</span>:<span class="number">06</span> /usr/bin/java -&gt; /etc/alternatives/java</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">[<span class="symbol">root@</span>node1 mec]# ll  /etc/alternatives/java</span><br><span class="line">lrwxrwxrwx. <span class="number">1</span> root root <span class="number">26</span> <span class="number">4</span>月  <span class="number">16</span> <span class="number">16</span>:<span class="number">06</span> /etc/alternatives/java -&gt; /usr/java/<span class="keyword">default</span>/bin/java</span><br></pre></td></tr></table></figure>
+
+<p>/etc/alternatives/java会指向最终的可执行文件，如果你有3个版本的java</p>
+<p>就需要运行 </p>
+<figure class="highlight crystal"><table><tr><td class="code"><pre><span class="line">[root@node1 mec]<span class="comment"># alternatives --config java</span></span><br><span class="line"></span><br><span class="line">共有 <span class="number">3</span> 个程序提供“java”。</span><br><span class="line"></span><br><span class="line">  选择    命令</span><br><span class="line">-----------------------------------------------</span><br><span class="line">   <span class="number">1</span>           /usr/<span class="class"><span class="keyword">lib</span>/<span class="title">jvm</span>/<span class="title">jre</span>-1.5.0-<span class="title">gcj</span>/<span class="title">bin</span>/<span class="title">java</span></span></span><br><span class="line">*  <span class="number">2</span>           /usr/<span class="class"><span class="keyword">lib</span>/<span class="title">jvm</span>/<span class="title">jre</span>-1.7.0-<span class="title">openjdk</span>.<span class="title">x86_64</span>/<span class="title">bin</span>/<span class="title">java</span></span></span><br><span class="line"> + <span class="number">3</span>           /usr/java/default/bin/java</span><br><span class="line"></span><br><span class="line">按 Enter 来保存当前选择[+]，或键入选择号码：</span><br></pre></td></tr></table></figure>
+
+<p>然后选择你想要选择的选项保存就好了</p>
+<p>如果这个列表里面没有你想要的而且已经安装了的程序，就需要添加 命令为</p>
+<figure class="highlight gradle"><table><tr><td class="code"><pre><span class="line">alternatives --install <span class="regexp">/usr/</span>bin<span class="regexp">/java java /u</span>sr<span class="regexp">/java/</span><span class="keyword">default</span><span class="regexp">/bin/</span>java <span class="number">500</span></span><br></pre></td></tr></table></figure>
+
+<p>这个命令实际操作的是 /var/lib/alternatives目录下对应的文件</p>
+<p>alternatives的安装删除显示等操作都是通过读取和修改这个目录下的文件实现的，而且是文本文件，感兴趣的可以取阅读一下</p>
+]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>jdk</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux之安装jdk及环境配置</title>
+    <url>/post/2aaf08ad.html</url>
+    <content><![CDATA[<h4 id="一、Linux下JDK安装"><a href="#一、Linux下JDK安装" class="headerlink" title="一、Linux下JDK安装"></a>一、Linux下JDK安装</h4><h5 id="yum安装"><a href="#yum安装" class="headerlink" title="yum安装"></a>yum安装</h5><p><code>通过yum安装的默认路径为：/usr/lib/jvm</code></p>
+<a id="more"></a>
+
+<ol>
+<li>首先执行以下命令查看可安装的jdk版本</li>
+
+<figure class="highlight mipsasm"><table><tr><td class="code"><pre><span class="line">yum -y list <span class="keyword">java*</span></span><br><span class="line"><span class="keyword">or</span></span><br><span class="line"><span class="keyword">yum </span>search <span class="keyword">jdk</span></span><br></pre></td></tr></table></figure>
+
+
+<li>选择自己需要的jdk版本进行安装，比如这里安装1.8，执行以下命令：</li>
+<figure class="highlight css"><table><tr><td class="code"><pre><span class="line"><span class="selector-tag">yum</span> <span class="selector-tag">install</span> <span class="selector-tag">-y</span> <span class="selector-tag">java-1</span><span class="selector-class">.8</span><span class="selector-class">.0-openjdk-devel</span><span class="selector-class">.x86_64</span></span><br></pre></td></tr></table></figure>
+等待安装完成即可。
+
+<li>安装完成之后，查看安装的jdk版本，输入以下指令：</li>
+<figure class="highlight applescript"><table><tr><td class="code"><pre><span class="line">java -<span class="built_in">version</span></span><br></pre></td></tr></table></figure>
+此处便可以看到自己安装的jdk版本信息。
+你如果好奇这个自动安装把jdk安装到哪里去了，其实你可以在usr/lib/jvm下找到它们。
+ok，完成！
+
+<li>卸载</li>
+
+<p> 检测是否已经安装JDK<br> <figure class="highlight vim"><table><tr><td class="code"><pre><span class="line">rpm -<span class="keyword">qa</span> | <span class="keyword">grep</span> jdk</span><br></pre></td></tr></table></figure></p>
+<p> 卸载系统自带jdk</p>
+<p> 删除系统自带JDK的命令，两种方法都可以：</p>
+ <figure class="highlight css"><table><tr><td class="code"><pre><span class="line"><span class="selector-tag">rpm</span> <span class="selector-tag">-e</span> –<span class="selector-tag">nodeps</span> <span class="selector-tag">java-1</span><span class="selector-class">.6</span><span class="selector-class">.0-openjdk-1</span><span class="selector-class">.6</span><span class="selector-class">.0</span><span class="selector-class">.0-1</span><span class="selector-class">.41</span><span class="selector-class">.1</span><span class="selector-class">.10</span><span class="selector-class">.4</span><span class="selector-class">.e16</span><span class="selector-class">.x86_64</span></span><br><span class="line"><span class="selector-tag">OR</span></span><br><span class="line"><span class="selector-tag">yum</span> <span class="selector-tag">-y</span> <span class="selector-tag">remove</span>  <span class="selector-tag">java-1</span><span class="selector-class">.6</span><span class="selector-class">.0-openjdk-1</span><span class="selector-class">.6</span><span class="selector-class">.0</span><span class="selector-class">.0-1</span><span class="selector-class">.41</span><span class="selector-class">.1</span><span class="selector-class">.10</span><span class="selector-class">.4</span><span class="selector-class">.el6</span><span class="selector-class">.x86_64</span></span><br></pre></td></tr></table></figure>
+
+<p> 继续用第一步的命令检测，或者用：</p>
+ <figure class="highlight vim"><table><tr><td class="code"><pre><span class="line">rpm -<span class="keyword">qa</span> | <span class="keyword">grep</span> gcj</span><br></pre></td></tr></table></figure>
+<p> 然后再用上面删除的方法把libgcj和java-gcj的文件删掉.</p>
+</ol>
+
+<h5 id="rpm安装"><a href="#rpm安装" class="headerlink" title="rpm安装"></a>rpm安装</h5><ol>
+<li>获取文件权限</li>
+
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">chmod -R <span class="number">777</span>    /storage/sdc-data/software/jdk<span class="number">-8</span>u65-linux-x64.rpm</span><br></pre></td></tr></table></figure>
+
+<li>安装JDK</li>
+
+<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">rpm -ivh  <span class="regexp">/storage/</span>sdc-data<span class="regexp">/software/</span>jdk-<span class="number">8</span>u65-linux-x64.rpm</span><br></pre></td></tr></table></figure>
+
+<p>该命令默认将jdk安装到了/usr/java目录下。</p>
+<li>移动安装目录</li>
+
+<p> 将jdk安装目录，重命名并且移动到目录/usr/local/下。并查看是否移动成功。</p>
+ <figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">mv /usr/java/jdk1<span class="number">.8</span><span class="number">.0</span>_45 /usr/local/jdk1<span class="number">.8</span></span><br></pre></td></tr></table></figure>
+
+ <li>rpm包的卸载</li>
+
+<p>   输入命令查看rpm包安装信息，如果第一条未出现信息，可以使用第二条命令查看，如果都没  有可能是未安装或者是tar包安装的<br>  <figure class="highlight vim"><table><tr><td class="code"><pre><span class="line">rpm -<span class="keyword">qa</span> | <span class="keyword">grep</span> jdk</span><br></pre></td></tr></table></figure><br>  我用上述rpm包安装之后，用命令查看，提示如下：<br>  <figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">[<span class="symbol">root@</span>master100 local]# rpm -qa | grep jdk</span><br><span class="line">jdk1<span class="number">.8</span><span class="number">-1.8</span><span class="number">.0</span>_181-fcs.x86_64</span><br></pre></td></tr></table></figure><br>  知道安装的rpm包名后就可以卸载了，卸载命令如下：<br>  <figure class="highlight css"><table><tr><td class="code"><pre><span class="line"><span class="selector-tag">rpm</span> <span class="selector-tag">-e</span> <span class="selector-tag">--nodeps</span> <span class="selector-tag">jdk1</span><span class="selector-class">.8-1</span><span class="selector-class">.8</span><span class="selector-class">.0_181-fcs</span><span class="selector-class">.x86_64</span></span><br></pre></td></tr></table></figure><br>  卸载完成后删除环境变量<br>  <figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">vi /etc/profile</span><br><span class="line">source /etc/profile</span><br></pre></td></tr></table></figure><br> </p></ol><p></p>
+<h5 id="tar包安装"><a href="#tar包安装" class="headerlink" title="tar包安装"></a>tar包安装</h5> <ol>
+
+ <li>下载 jdk-8u231-linux-x64.tar.gz</li>
+
+ <figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">wget https:<span class="regexp">//</span>download.oracle.com<span class="regexp">/otn/</span>java<span class="regexp">/jdk/</span><span class="number">8</span>u231-b11<span class="regexp">/5b13a193868b4bf28bcb45c792fce896/</span>jdk-<span class="number">8</span>u231-linux-x64.tar.gz</span><br></pre></td></tr></table></figure>
+
+ <li>解压文件，命令如下，输入后会出现一长串的提示：</li>
+
+ <figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">tar -zxvf /usr/local/jdk<span class="number">-8</span>u231-linux-x64.tar.gz</span><br></pre></td></tr></table></figure>
+
+ <li>解压后文件夹名为：jdk1.8.0_231</li>
+
+<p> 在这里修改一下文件名，将jdk1.8.0_231改成java，方便我们后面配置环境变量，在这也可以不修改，在配置环境变量时要注意文件名不能写错，修改文件名命令如下：</p>
+ <figure class="highlight awk"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">mv <span class="regexp">/usr/</span>local<span class="regexp">/jdk1.8.0_231 /u</span>sr<span class="regexp">/local/</span>java</span><br></pre></td></tr></table></figure>
+
+ <li>tar包的卸载</li>
+
+<p> 将安装包删除，然后把配置文件内添加的环境变量删除</p>
+<p> 删除安装包的命令如下：</p>
+ <figure class="highlight stata"><table><tr><td class="code"><pre><span class="line"><span class="keyword">rm</span> -rf /usr/<span class="keyword">local</span>/java</span><br></pre></td></tr></table></figure>
+<p> 修改配置文件的方法和上述配置环境变量一样</p>
+ </ol>
+
+<h4 id="二、配置环境变量"><a href="#二、配置环境变量" class="headerlink" title="二、配置环境变量"></a>二、配置环境变量</h4> <ol>
+
+  <li>用vi命令 打开文件,打开后默认是命令模式,输入a或i可进入编辑模式</li>
+
+  <figure class="highlight vim"><table><tr><td class="code"><pre><span class="line"><span class="keyword">vi</span> /etc/<span class="keyword">profile</span></span><br></pre></td></tr></table></figure>
+
+  <li>在文件最后配置如下变量,编辑完成按ESC键退出编辑,然后输入:wq或者:x保存退出.</li>
+
+  <figure class="highlight crystal"><table><tr><td class="code"><pre><span class="line">set java environment</span><br><span class="line">JAVA_HOME=<span class="regexp">/usr/local</span><span class="regexp">/java/jdk</span>1.<span class="number">8.0_231</span>        </span><br><span class="line">JRE_HOME=<span class="regexp">/usr/local</span><span class="regexp">/java/jdk</span>1.<span class="number">8.0_231</span>/jre     </span><br><span class="line">CLASS_PATH=.:$JAVA_HOME/<span class="class"><span class="keyword">lib</span>/<span class="title">dt</span>.<span class="title">jar</span>:$<span class="title">JAVA_HOME</span>/<span class="title">lib</span>/<span class="title">tools</span>.<span class="title">jar</span>:$<span class="title">JRE_HOME</span>/<span class="title">lib</span></span></span><br><span class="line">PATH=$<span class="symbol">PATH:</span>$JAVA_HOME/<span class="symbol">bin:</span>$JRE_HOME/bin</span><br><span class="line">export JAVA_HOME JRE_HOME CLASS_PATH PATH</span><br></pre></td></tr></table></figure>
+
+  <li>然后输入source /etc/profile命令，使配置文件生效。</li>
+
+   <figure class="highlight gradle"><table><tr><td class="code"><pre><span class="line"><span class="keyword">source</span> <span class="regexp">/etc/</span>profile</span><br></pre></td></tr></table></figure>
+
+   <li>建立软连接</li>
+
+<p>   <code>tar形式</code></p>
+   <figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">ln -s <span class="regexp">/usr/</span>local<span class="regexp">/java/</span>jdk1.<span class="number">8.0</span>_231<span class="regexp">/bin/</span>java <span class="regexp">/usr/</span>bin<span class="regexp">/java</span></span><br></pre></td></tr></table></figure>
+
+  <li>检测配置是否成功</li>
+
+   <figure class="highlight applescript"><table><tr><td class="code"><pre><span class="line">java -<span class="built_in">version</span></span><br></pre></td></tr></table></figure>
+
+  </ol>
+
+<p>  <code>有问题参考：</code><a href="/post/4824a74d.html" title="linux之使用alternatives 切换Java版本">linux之使用alternatives 切换Java版本</a></p>
+]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>jdk</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SpringBoot之统一包装响应</title>
+    <url>/post/88151b22.html</url>
+    <content><![CDATA[<p>&emsp;&emsp;SpringBoot 中可以基于 <code>ControllerAdvice</code> 和 <code>HttpMessageConverter</code> 实现对数据返回的包装。</p>
+<p>&emsp;&emsp;实现如下，先来写一个 POJO 来定义一下返回格式：</p>
+<a id="more"></a>
+
+
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> com.example.demo.common.exception.base.ErrorCode;</span><br><span class="line"><span class="keyword">import</span> lombok.AllArgsConstructor;</span><br><span class="line"><span class="keyword">import</span> lombok.Getter;</span><br><span class="line"><span class="keyword">import</span> org.springframework.http.HttpStatus;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="meta">@AllArgsConstructor</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Response</span>&lt;<span class="type">T</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> int code = HttpStatus.OK.value();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String msg = <span class="string">"success"</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> T <span class="keyword">data</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> Response(T <span class="keyword">data</span>) &#123;</span><br><span class="line">        <span class="keyword">this</span>.<span class="keyword">data</span> = <span class="keyword">data</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> Response(int code, String msg) &#123;</span><br><span class="line">        <span class="keyword">this</span>.code = code;</span><br><span class="line">        <span class="keyword">this</span>.msg = msg;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> Response(int code, T <span class="keyword">data</span>) &#123;</span><br><span class="line">        <span class="keyword">this</span>.code = code;</span><br><span class="line">        <span class="keyword">this</span>.<span class="keyword">data</span> = <span class="keyword">data</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> Response(ErrorCode errorCode) &#123;</span><br><span class="line">        <span class="keyword">this</span>.code = errorCode.getCode();</span><br><span class="line">        <span class="keyword">this</span>.msg = errorCode.getMessage();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> Response(ErrorCode errorCode, T <span class="keyword">data</span>) &#123;</span><br><span class="line">        <span class="keyword">this</span>.code = errorCode.getCode();</span><br><span class="line">        <span class="keyword">this</span>.msg = errorCode.getMessage();</span><br><span class="line">        <span class="keyword">this</span>.<span class="keyword">data</span> = <span class="keyword">data</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<pre><code>这里用到了lombok，lombok的使用介绍不在本文范围内。</code></pre><p>用一个 ResponseBodyAdvice 类的实现包装 Controller 的返回值：<br>以下是我以前的实现方式：</p>
+<figure class="highlight crystal"><table><tr><td class="code"><pre><span class="line">import com.example.demo.common.RequestContextHolder;</span><br><span class="line">import com.fasterxml.jackson.databind.ObjectMapper;</span><br><span class="line">import org.slf4j.Logger;</span><br><span class="line">import org.slf4j.LoggerFactory;</span><br><span class="line">import org.springframework.beans.factory.<span class="keyword">annotation</span>.<span class="title">Autowired</span>;</span><br><span class="line">import org.springframework.core.MethodParameter;</span><br><span class="line">import org.springframework.core.<span class="keyword">annotation</span>.<span class="title">Order</span>;</span><br><span class="line">import org.springframework.http.MediaType;</span><br><span class="line">import org.springframework.http.server.ServerHttpRequest;</span><br><span class="line">import org.springframework.http.server.ServerHttpResponse;</span><br><span class="line">import org.springframework.web.bind.<span class="keyword">annotation</span>.<span class="title">ControllerAdvice</span>;</span><br><span class="line">import org.springframework.web.servlet.mvc.method.<span class="keyword">annotation</span>.<span class="title">ResponseBodyAdvice</span>;</span><br><span class="line"></span><br><span class="line">@ControllerAdvice</span><br><span class="line">public <span class="class"><span class="keyword">class</span> <span class="title">FormatResponseBodyAdvice</span> <span class="title">implements</span> <span class="title">ResponseBodyAdvice</span> &#123;</span></span><br><span class="line">    <span class="keyword">private</span> static Logger logger = LoggerFactory.getLogger(FormatResponseBodyAdvice<span class="class">.<span class="keyword">class</span>);</span></span><br><span class="line"></span><br><span class="line">    @Autowired</span><br><span class="line">    <span class="keyword">private</span> ObjectMapper objectMapper;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public boolean supports(MethodParameter returnType, Class converterType) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) &#123;</span><br><span class="line"></span><br><span class="line">        Object wrapperBody = body;</span><br><span class="line">        try &#123;</span><br><span class="line">            <span class="keyword">if</span> (!(body instanceof Response)) &#123;</span><br><span class="line">                <span class="keyword">if</span> (body instanceof String) &#123;</span><br><span class="line">                    wrapperBody = objectMapper.writeValueAsString(new Response&lt;&gt;(body));</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    wrapperBody = new Response&lt;&gt;(body);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            logger.error(<span class="string">"request uri path: &#123;&#125;, format response body error"</span>, request.getURI().getPath(), e);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> wrapperBody;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<div class="note primary no-icon">
+            <p>为什么要对返回类型是 String 时进行特殊处理呢？因为如果直接返回 new Response&lt;&gt;(body) 的话，在使用时返回 String 类型的话，会报类型转换异常，当时也没有理解什么原因导致的，所以最后使用了 jackson 对 Response 又做了一次序列化。</p>
+          </div>
+
+<p>今天找到了导致这个异常的原因：</p>
+<div class="note primary no-icon">
+            <p>因为在所有的 HttpMessageConverter 实例集合中，StringHttpMessageConverter 要比其它的 Converter 排得靠前一些。我们需要将处理 Object 类型的 HttpMessageConverter 放得靠前一些，这可以在 Configuration 类中完成：</p>
+          </div>
+
+<figure class="highlight css"><table><tr><td class="code"><pre><span class="line"><span class="selector-tag">import</span> <span class="selector-tag">org</span><span class="selector-class">.springframework</span><span class="selector-class">.context</span><span class="selector-class">.annotation</span><span class="selector-class">.Configuration</span>;</span><br><span class="line"><span class="selector-tag">import</span> <span class="selector-tag">org</span><span class="selector-class">.springframework</span><span class="selector-class">.http</span><span class="selector-class">.converter</span><span class="selector-class">.HttpMessageConverter</span>;</span><br><span class="line"><span class="selector-tag">import</span> <span class="selector-tag">org</span><span class="selector-class">.springframework</span><span class="selector-class">.http</span><span class="selector-class">.converter</span><span class="selector-class">.json</span><span class="selector-class">.MappingJackson2HttpMessageConverter</span>;</span><br><span class="line"><span class="selector-tag">import</span> <span class="selector-tag">org</span><span class="selector-class">.springframework</span><span class="selector-class">.web</span><span class="selector-class">.servlet</span><span class="selector-class">.config</span><span class="selector-class">.annotation</span><span class="selector-class">.WebMvcConfigurer</span>;</span><br><span class="line"></span><br><span class="line"><span class="selector-tag">import</span> <span class="selector-tag">java</span><span class="selector-class">.util</span><span class="selector-class">.List</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@Configuration</span></span><br><span class="line">public class WebConfiguration implements WebMvcConfigurer &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">@Override</span></span><br><span class="line">    public void configureMessageConverters(List&lt;HttpMessageConverter&lt;?&gt;&gt; converters) &#123;</span><br><span class="line">        <span class="selector-tag">converters</span><span class="selector-class">.add</span>(0, <span class="selector-tag">new</span> <span class="selector-tag">MappingJackson2HttpMessageConverter</span>());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后 FormatResponseBodyAdvice 就可以修改为如下实现：</p>
+<figure class="highlight crystal"><table><tr><td class="code"><pre><span class="line">import org.springframework.core.MethodParameter;</span><br><span class="line">import org.springframework.http.MediaType;</span><br><span class="line">import org.springframework.http.server.ServerHttpRequest;</span><br><span class="line">import org.springframework.http.server.ServerHttpResponse;</span><br><span class="line">import org.springframework.http.server.ServletServerHttpRequest;</span><br><span class="line">import org.springframework.web.bind.<span class="keyword">annotation</span>.<span class="title">ControllerAdvice</span>;</span><br><span class="line">import org.springframework.web.servlet.mvc.method.<span class="keyword">annotation</span>.<span class="title">ResponseBodyAdvice</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@ControllerAdvice</span><br><span class="line">public <span class="class"><span class="keyword">class</span> <span class="title">FormatResponseBodyAdvice</span> <span class="title">implements</span> <span class="title">ResponseBodyAdvice</span> &#123;</span></span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public boolean supports(MethodParameter returnType, Class converterType) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType,</span><br><span class="line">                                  Class selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (!(body instanceof Response)) &#123;</span><br><span class="line">            <span class="keyword">return</span> new Response&lt;&gt;(body);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> body;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>比之前的实现方式优雅了很多而且不用再处理 jackson 的异常了。</p>
+<p>写一个 Controller 来尝试一下：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(<span class="meta-string">"/hello"</span>)</span></span><br><span class="line">    <span class="keyword">public</span> String hello() &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"hello world!"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>请求这个端点得到结果：</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"code"</span>: <span class="number">200</span>,</span><br><span class="line">    <span class="attr">"msg"</span>: <span class="string">"success"</span>,</span><br><span class="line">    <span class="attr">"data"</span>: <span class="string">"hello world!"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>说明我们的配置是成功的，同时可以在相应头中看到：</p>
+<figure class="highlight elm"><table><tr><td class="code"><pre><span class="line"><span class="title">content</span>-<span class="keyword">type</span>: application/json;charset=<span class="type">UTF</span>-8</span><br></pre></td></tr></table></figure>
+
+<p>如果是之前的实现方式，这里的值就是：</p>
+<figure class="highlight elm"><table><tr><td class="code"><pre><span class="line"><span class="title">content</span>-<span class="keyword">type</span>: html/text</span><br></pre></td></tr></table></figure>
+
+<p>也不太符合 <code>restful</code> 规范.</p>
+]]></content>
+      <categories>
+        <category>SpringBoot</category>
+      </categories>
+      <tags>
+        <tag>SpringBoot</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>hexo之404 跳转</title>
+    <url>/post/20e74403.html</url>
+    <content><![CDATA[<h4 id="新建-404-页面"><a href="#新建-404-页面" class="headerlink" title="新建 404 页面"></a>新建 404 页面</h4><figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">hexo new<span class="built_in"> page </span>404</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<h4 id="编辑-404-md"><a href="#编辑-404-md" class="headerlink" title="编辑 404.md"></a>编辑 <code>404.md</code></h4><p>&emsp;&emsp;添加 Front-matter 信息 permalink: /404 并替换自己的网站地址，下面的网址是腾讯公益信息宝贝回家，寻找失踪儿童的信息。</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="number">404</span></span><br><span class="line"><span class="attr">date:</span> <span class="number">2018</span><span class="number">-11</span><span class="number">-08</span> <span class="number">21</span><span class="string">:19:51</span></span><br><span class="line"><span class="attr">permalink:</span> <span class="string">/404</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="string">&lt;script</span> <span class="string">type="text/javascript"</span> <span class="string">src="//qzonestyle.gtimg.cn/qzone/hybrid/app/404/search_children.js"</span> <span class="string">charset="utf-8"</span> <span class="string">homePageUrl="https://pzb568.github.io"</span> <span class="string">homePageName="回到我的主页"&gt;&lt;/script&gt;</span></span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>hexo建站</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>hexo之永久链接</title>
+    <url>/post/2c523943.html</url>
+    <content><![CDATA[<p>&emsp;&emsp;设置永久链接，所有的文章都是中文的以至于网站地址特别长，不方便记忆，不美观。利用 hexo-abbrlink 这个插件可以解决。</p>
+<a id="more"></a>
+
+<h4 id="安装-hexo-abbrlink"><a href="#安装-hexo-abbrlink" class="headerlink" title="安装 hexo-abbrlink"></a>安装 hexo-abbrlink</h4><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">npm <span class="keyword">install</span> hexo-abbrlink <span class="comment">--save</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="站点配置"><a href="#站点配置" class="headerlink" title="站点配置"></a>站点配置</h4><figure class="highlight dts"><table><tr><td class="code"><pre><span class="line"><span class="symbol">permalink:</span> post/:abbrlink.html</span><br><span class="line"><span class="symbol">abbrlink:</span></span><br><span class="line"><span class="symbol">  alg:</span> crc32  <span class="meta"># 算法：crc16(default) and crc32</span></span><br><span class="line"><span class="symbol">  rep:</span> hex    <span class="meta"># 进制：dec(default) and hex</span></span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>hexo建站</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>hexo之主题更新问题处理</title>
+    <url>/post/58bb50d8.html</url>
+    <content><![CDATA[<p>&emsp;&emsp;由于 next 主题经常更新，自己又在本地大量修改主题，更新中会有很多问题，经过很多次折腾及网络上其他朋友的教程，我找到了不错的处理方法。</p>
+<a id="more"></a>
+
+<h3 id="进入主题目录并更新"><a href="#进入主题目录并更新" class="headerlink" title="进入主题目录并更新"></a>进入主题目录并更新</h3><figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="attr">cd</span> <span class="string">themes/next</span></span><br><span class="line"><span class="attr">git</span> <span class="string">pull</span></span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;因为修改了很多的配置项目，所以更新<code>失败</code>了</p>
+<h4 id="一，解决更新"><a href="#一，解决更新" class="headerlink" title="一，解决更新"></a>一，解决更新</h4><h5 id="1，将修改储藏到暂存区"><a href="#1，将修改储藏到暂存区" class="headerlink" title="1，将修改储藏到暂存区"></a>1，将修改储藏到暂存区</h5><p>&emsp;&emsp;我们可以通过 <code>git stash</code> 这句命令将对主题文件的修改储存到本地的暂存区：</p>
+<figure class="highlight ebnf"><table><tr><td class="code"><pre><span class="line"><span class="attribute">git stash</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="2，执行更新"><a href="#2，执行更新" class="headerlink" title="2，执行更新"></a>2，执行更新</h5><p>&emsp;&emsp;我们现在需要再次使用 git pull 命令来获取最新的主题文件，别担心，这次不会再有上面的错误了</p>
+<figure class="highlight ebnf"><table><tr><td class="code"><pre><span class="line"><span class="attribute">git pull</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="3，从暂存区取出修改"><a href="#3，从暂存区取出修改" class="headerlink" title="3，从暂存区取出修改"></a>3，从暂存区取出修改</h5><p>&emsp;&emsp;我们现在要通过执行 git stash pop 这句命令来从暂存区取出修改。</p>
+<figure class="highlight avrasm"><table><tr><td class="code"><pre><span class="line">git stash <span class="keyword">pop</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="二，报错"><a href="#二，报错" class="headerlink" title="二，报错"></a>二，报错</h4><p>&emsp;&emsp;如果报错如下内容需要进入提示的文件修改</p>
+<figure class="highlight pgsql"><table><tr><td class="code"><pre><span class="line">$ git stash pop</span><br><span class="line">Auto-merging _config.yml</span><br><span class="line"><span class="keyword">CONFLICT</span> (content): Merge <span class="keyword">conflict</span> <span class="keyword">in</span> _config.yml</span><br></pre></td></tr></table></figure>
+
+<h5 id="1，进入文件"><a href="#1，进入文件" class="headerlink" title="1，进入文件"></a>1，进入文件</h5><p>&emsp;&emsp;可以看到文中 &lt;&lt;&lt;&lt;&lt;&gt;&gt;&gt;&gt;&gt;b8e436 中间是你自己的分支，删掉一个就可以了</p>
+<h5 id="2，提交记录"><a href="#2，提交记录" class="headerlink" title="2，提交记录"></a>2，提交记录</h5><figure class="highlight dockerfile"><table><tr><td class="code"><pre><span class="line">git <span class="keyword">add</span><span class="bash"> _config.yml</span></span><br><span class="line">git commit -m <span class="string">"冲突处理"</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="3，在更新"><a href="#3，在更新" class="headerlink" title="3，在更新"></a>3，在更新</h5><figure class="highlight ebnf"><table><tr><td class="code"><pre><span class="line"><span class="attribute">git pull</span></span><br></pre></td></tr></table></figure>
+<blockquote class="blockquote-center"><p>主题升级成功。</p>
+</blockquote>]]></content>
+      <categories>
+        <category>hexo建站</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux之hosts主机名不对</title>
+    <url>/post/2cf589fe.html</url>
+    <content><![CDATA[<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><h4 id="现象："><a href="#现象：" class="headerlink" title="现象："></a>现象：</h4><div class="note info no-icon">
+            <p>[root@bogon ~]#<br>[root@bogon ~]# hostname<br>bogon</p>
+          </div>
+
+<a id="more"></a>
+
+<h4 id="查看几个相关文件，都正确"><a href="#查看几个相关文件，都正确" class="headerlink" title="查看几个相关文件，都正确"></a>查看几个相关文件，都正确</h4><div class="note info no-icon">
+            <p>[root@bogon ~]# vi /etc/sysconfig/network</p><p>NETWORKING=yes<br>HOSTNAME=localhost.localdomain</p><p>[root@bogon ~]# vi /etc/hosts</p><p>127.0.0.1 localhost localhost.localdomain localhost4 localhost4.localdomain4<br>::1 localhost localhost.localdomain localhost6 localhost6.localdomain6</p>
+          </div>
+
+<h4 id="继续，dns的的配置"><a href="#继续，dns的的配置" class="headerlink" title="继续，dns的的配置"></a>继续，dns的的配置</h4><div class="note info no-icon">
+            <p>[root@bogon logs]# vi /etc/resolv.conf<br>#Generated by NetworkManager<br>search com (大爷的，这行不知道咋来的，删不掉)<br>nameserver 10.211.55.1</p>
+          </div>
+
+<h3 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h3><h4 id="方法："><a href="#方法：" class="headerlink" title="方法："></a>方法：</h4><div class="note success no-icon">
+            <p>[root@bogon ~]# hostname localhost<br>[root@localhost logs]# hostname<br>localhost</p>
+          </div>
+
+<h4 id="又变回去"><a href="#又变回去" class="headerlink" title="又变回去"></a>又变回去</h4><p>若4操作后重启发现hostname又变回去了，如下操作</p>
+<div class="note default">
+            <p><code>vi /etc/hosts</code>，追加 本机IP localhost</p><figure class="highlight diff"><table><tr><td class="code"><pre><span class="line">127.0.0.1 localhost localhost.localdomain localhost4 localhost4.localdomain4</span><br><span class="line">::1 localhost localhost.localdomain localhost6 localhost6.localdomain6</span><br><span class="line"><span class="addition">+ 10.211.55.12 localhost（追加的）</span></span><br></pre></td></tr></table></figure>
+          </div>]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>Linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>bootstrap-table 显示行号</title>
+    <url>/post/644b0626.html</url>
+    <content><![CDATA[<h4 id="动态生成行号"><a href="#动态生成行号" class="headerlink" title="动态生成行号"></a>动态生成行号</h4><p>思想：借助bootstrap-table 本身的<code>index</code>属性和<code>options</code>的对象， 巧妙的的通过<code>formatter</code> 实现</p>
+<a id="more"></a>
+
+<figure class="highlight clojure"><table><tr><td class="code"><pre><span class="line">&#123;field: <span class="string">"Number"</span>,title: <span class="string">"序号"</span>,halign: 'center',align:'center',</span><br><span class="line">    formatter:function (<span class="name">value</span>, row, index) &#123;</span><br><span class="line">        var options = $table.bootstrapTable(<span class="string">"getOptions"</span>)<span class="comment">;</span></span><br><span class="line">        return (<span class="name">options.pageNumber-1</span>)*(<span class="name">options.pageSize</span>)+index+1;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>bootstrap</category>
+        <category>table</category>
+      </categories>
+      <tags>
+        <tag>bootstrap</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>jenkins之shell 部署脚本</title>
+    <url>/post/5f2bf15a.html</url>
+    <content><![CDATA[<h4 id="记录一下，以防遗忘。"><a href="#记录一下，以防遗忘。" class="headerlink" title="记录一下，以防遗忘。"></a>记录一下，以防遗忘。</h4><a id="more"></a>
+
+<p><img src="/post/5f2bf15a/shell.jpg" alt></p>
+]]></content>
+      <categories>
+        <category>jenkins</category>
+      </categories>
+      <tags>
+        <tag>jenkins</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>jenkins之SSH Publishers时踩的坑</title>
+    <url>/post/4995ab80.html</url>
+    <content><![CDATA[<h4 id="source相对路径问题"><a href="#source相对路径问题" class="headerlink" title="source相对路径问题"></a>source相对路径问题</h4><p><code>source</code>相对路径问题，不是<span class="label danger">.Jenkins/workspace</span>，而是<span class="label success">.jenkins/workspace/[project]/</span></p>
+<a id="more"></a>
+
+
+<p><img src="/post/4995ab80/jkp.jpeg" alt></p>
+]]></content>
+      <categories>
+        <category>jenkins</category>
+      </categories>
+      <tags>
+        <tag>jenkins</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>hexo之修改文章样式</title>
+    <url>/post/346628a2.html</url>
+    <content><![CDATA[<h4 id="文章样式"><a href="#文章样式" class="headerlink" title="文章样式"></a>文章样式</h4><p>修改<code>themes/next/source/css/_custom/custom.styl</code>文件，加入自定义样式</p>
+<a id="more"></a>
+
+
+<figure class="highlight scss"><table><tr><td class="code"><pre><span class="line"><span class="comment">/*******************文章样式*****************************/</span></span><br><span class="line"><span class="comment">// 文章</span></span><br><span class="line"><span class="selector-class">.post</span> &#123;</span><br><span class="line">    <span class="attribute">margin-bottom</span>: <span class="number">50px</span>;</span><br><span class="line">    <span class="attribute">padding</span>: <span class="number">45px</span> <span class="number">36px</span> <span class="number">36px</span> <span class="number">36px</span>;</span><br><span class="line">    <span class="attribute">box-shadow</span>: <span class="number">0px</span> <span class="number">0px</span> <span class="number">10px</span> <span class="number">0px</span> rgba(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0.5</span>);</span><br><span class="line">    <span class="attribute">background-color</span>: rgb(<span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 文章标题字体</span></span><br><span class="line"><span class="selector-class">.posts-expand</span> <span class="selector-class">.post-title</span> &#123;</span><br><span class="line">    <span class="attribute">font-size</span>: <span class="number">26px</span>;</span><br><span class="line">    <span class="attribute">font-weight</span>: <span class="number">700</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 文章标题动态效果</span></span><br><span class="line"><span class="selector-class">.posts-expand</span> <span class="selector-class">.post-title-link</span><span class="selector-pseudo">::before</span> &#123;</span><br><span class="line">    <span class="attribute">background-image</span>: linear-gradient(<span class="number">90deg</span>, <span class="number">#a166ab</span> <span class="number">0%</span>, <span class="number">#ef4e7b</span> <span class="number">25%</span>, <span class="number">#f37055</span> <span class="number">50%</span>, <span class="number">#ef4e7b</span> <span class="number">75%</span>, <span class="number">#a166ab</span> <span class="number">100%</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 文章元数据（meta）留白更改</span></span><br><span class="line"><span class="selector-class">.posts-expand</span> <span class="selector-class">.post-meta</span> &#123;</span><br><span class="line">    <span class="attribute">margin</span>: <span class="number">10px</span> <span class="number">0px</span> <span class="number">20px</span> <span class="number">0px</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 文章的描述description</span></span><br><span class="line"><span class="selector-class">.posts-expand</span> <span class="selector-class">.post-meta</span> <span class="selector-class">.post-description</span> &#123;</span><br><span class="line">    <span class="attribute">font-style</span>: italic;</span><br><span class="line">    <span class="attribute">font-size</span>: <span class="number">14px</span>;</span><br><span class="line">    <span class="attribute">margin-top</span>: <span class="number">30px</span>;</span><br><span class="line">    <span class="attribute">margin-bottom</span>: <span class="number">0px</span>;</span><br><span class="line">    <span class="attribute">color</span>: <span class="number">#666</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>hexo建站</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hexo之修改[Read More]按钮样式</title>
+    <url>/post/3f27960.html</url>
+    <content><![CDATA[<h4 id="修改-Read-More-按钮样式"><a href="#修改-Read-More-按钮样式" class="headerlink" title="修改[Read More]按钮样式"></a>修改[Read More]按钮样式</h4><p> 修改<code>themes/next/source/css/_custom/custom.styl</code>文件，加入自定义样式</p>
+<a id="more"></a>
+
+
+ <figure class="highlight scss"><table><tr><td class="code"><pre><span class="line"> <span class="comment">// [Read More]按钮样式</span></span><br><span class="line"><span class="selector-class">.post-button</span> <span class="selector-class">.btn</span> &#123;</span><br><span class="line">    <span class="attribute">color</span>: <span class="number">#555</span> <span class="meta">!important</span>;</span><br><span class="line">    <span class="attribute">background-color</span>: rgb(<span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>);</span><br><span class="line">    <span class="attribute">border-radius</span>: <span class="number">3px</span>;</span><br><span class="line">    <span class="attribute">font-size</span>: <span class="number">15px</span>;</span><br><span class="line">    <span class="attribute">box-shadow</span>: inset <span class="number">0px</span> <span class="number">0px</span> <span class="number">10px</span> <span class="number">0px</span> rgba(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0.35</span>);</span><br><span class="line">    <span class="attribute">border</span>: none <span class="meta">!important</span>;</span><br><span class="line">    <span class="attribute">transition-property</span>: unset;</span><br><span class="line">    <span class="attribute">padding</span>: <span class="number">0px</span> <span class="number">15px</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="selector-class">.post-button</span> <span class="selector-class">.btn</span><span class="selector-pseudo">:hover</span> &#123;</span><br><span class="line">    <span class="attribute">color</span>: rgb(<span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>) <span class="meta">!important</span>;</span><br><span class="line">    <span class="attribute">border-radius</span>: <span class="number">3px</span>;</span><br><span class="line">    <span class="attribute">font-size</span>: <span class="number">15px</span>;</span><br><span class="line">    <span class="attribute">box-shadow</span>: inset <span class="number">0px</span> <span class="number">0px</span> <span class="number">10px</span> <span class="number">0px</span> rgba(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0.35</span>);</span><br><span class="line">    <span class="attribute">background-image</span>: linear-gradient(<span class="number">90deg</span>, <span class="number">#a166ab</span> <span class="number">0%</span>, <span class="number">#ef4e7b</span> <span class="number">25%</span>, <span class="number">#f37055</span> <span class="number">50%</span>, <span class="number">#ef4e7b</span> <span class="number">75%</span>, <span class="number">#a166ab</span> <span class="number">100%</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>hexo建站</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>git常用命令</title>
+    <url>/post/423abe9e.html</url>
+    <content><![CDATA[<h2 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h2><h5 id="初始配置"><a href="#初始配置" class="headerlink" title="初始配置"></a>初始配置</h5><figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">mkdir d:\git_test</span><br><span class="line">git<span class="built_in"> config </span>--global user.name <span class="string">"Your name"</span></span><br><span class="line">git<span class="built_in"> config </span>--global user.email <span class="string">"you@example.com"</span></span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<h5 id="获取当前git配置"><a href="#获取当前git配置" class="headerlink" title="获取当前git配置"></a>获取当前git配置</h5><figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">git --version</span><br><span class="line">git<span class="built_in"> config </span>--global user.name         # 获取当前登录的用户</span><br><span class="line">git<span class="built_in"> config </span>--global user.email        # 获取当前登录用户的邮箱</span><br></pre></td></tr></table></figure>
+
+<h5 id="创建文件并写入内容"><a href="#创建文件并写入内容" class="headerlink" title="创建文件并写入内容"></a>创建文件并写入内容</h5><p>如果文件不存在，则创建文件</p>
+<figure class="highlight vim"><table><tr><td class="code"><pre><span class="line"><span class="keyword">echo</span> <span class="string">"hello git"</span></span><br><span class="line">&gt; <span class="built_in">index</span>.html                          # 将<span class="string">'hello git'</span>写入到<span class="built_in">index</span>.html中</span><br></pre></td></tr></table></figure>
+<p>单个<code>&gt;</code>箭头表示写入，<code>&gt;&gt;</code>表示追加</p>
+<h5 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h5><figure class="highlight n1ql"><table><tr><td class="code"><pre><span class="line">git init                        # 初始化当前所在目录的这个项目</span><br><span class="line">git status                      # 查看项目状态，有没有添加或者修改文件</span><br><span class="line">git add .                       # 给目前的项目制作一个快照snapshot（快照只是登记留名，快照不等于记录在案，git管快照叫做索引<span class="keyword">index</span>）</span><br><span class="line">git <span class="keyword">commit</span>                      # 将快照里登记的内容永久写入git仓库</span><br><span class="line">git <span class="keyword">commit</span> -a                   # 直接提交所有修改，省去了<span class="symbol">``</span>git add<span class="symbol">``</span>和<span class="symbol">``</span>git diff<span class="symbol">``</span>和<span class="symbol">``</span>git <span class="keyword">commit</span><span class="symbol">``</span>的工序</span><br><span class="line">                                # 无法把新增文件或文件夹加入进来，所以，如果你新增了文件或文件夹，那么就要老老实实的先<span class="symbol">``</span>git add ..<span class="symbol">``</span>，再<span class="symbol">``</span>git <span class="keyword">commit</span><span class="symbol">``</span></span><br><span class="line">git push                        # 把更新推送到远程分支</span><br><span class="line">git <span class="built_in">log</span> -p                      # git不但会给出开发日志，而且会显示每个开发版本的代码区别所在</span><br><span class="line">git <span class="built_in">log</span> --online                # 查看版本</span><br><span class="line">git diff                        # 比较暂存区和工作区的差别</span><br><span class="line">git diff --cached               # 比较暂存区和历史区的差别</span><br><span class="line">git diff master                 # 比较历史区和工作区的差别（修改）</span><br><span class="line">git checkout <span class="keyword">index</span>.html         # 用暂存区中的内容或者版本库中的内容覆盖掉工作区</span><br><span class="line">git reset HEAD <span class="keyword">index</span>.html       # 取消增加到暂存区的内容（添加时）</span><br><span class="line">git rm <span class="keyword">index</span>.html --cached      # 使用--cached表示只删除缓冲区中的内容</span><br><span class="line">git reset --hard HEAD/commit_id # 回滚版本</span><br><span class="line">git reflog                      # 回滚到未来</span><br></pre></td></tr></table></figure>
+<p>总结：先git add修改过的文件，再git diff并git status查看确认，然后git commit提交，然后输入开发日志，然后git push推送到远程分支，最后git log再次确认。</p>
+<h5 id="创建分支"><a href="#创建分支" class="headerlink" title="创建分支"></a>创建分支</h5><figure class="highlight mipsasm"><table><tr><td class="code"><pre><span class="line">git <span class="keyword">branch </span>                     <span class="comment"># 查看分支列表</span></span><br><span class="line">git <span class="keyword">branch </span>experiment           <span class="comment"># 创建experiment分支</span></span><br><span class="line">git checkout experiment         <span class="comment"># 切换到experiment分支</span></span><br><span class="line">git checkout -<span class="keyword">b </span>experiment      <span class="comment"># 创建分支并切换分支</span></span><br><span class="line">git commit -a                   <span class="comment"># 在分支上提交工作</span></span><br><span class="line">git checkout master             <span class="comment"># 切换到主干道</span></span><br><span class="line">git merge experiment            <span class="comment"># 合并分支到主干道</span></span><br><span class="line">git <span class="keyword">branch </span>-d experiment        <span class="comment"># -d，表示“在分支已经合并到主干后删除分支”。如果使用大写的-D的话，则表示“不论如何都删除分支”</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="使用git-stash命令保存和恢复进度"><a href="#使用git-stash命令保存和恢复进度" class="headerlink" title="使用git stash命令保存和恢复进度"></a>使用git stash命令保存和恢复进度</h5><figure class="highlight gauss"><table><tr><td class="code"><pre><span class="line">git stash                       <span class="meta"># 保留当前工作区进度，会把暂存区和工作区的改动保存起来</span></span><br><span class="line">git stash <span class="keyword">save</span> 'message...'     <span class="meta"># 保存当前工作区，并添加备注</span></span><br><span class="line">git stash list                  <span class="meta"># 显示保存进度的列表。也就意味着，git stash命令可以多次执行。</span></span><br><span class="line">git stash <span class="keyword">pop</span>                   <span class="meta"># 恢复最新的进度到工作区并删除。git默认会把工作区和缓存区的改动都恢复到工作区。</span></span><br><span class="line">git stash apply                 <span class="meta"># 恢复最新的进度到工作区不删除</span></span><br><span class="line">git stash <span class="built_in">drop</span> [stash_id]       <span class="meta"># 删除一个存储的进度，如果不指定stash_id，则默认删除最新的存储进度，stash_id从git stash list获取</span></span><br><span class="line">git stash <span class="keyword">clear</span>                 <span class="meta"># 删除所有存储的进度</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="撤销一次已经提交到Github的内容"><a href="#撤销一次已经提交到Github的内容" class="headerlink" title="撤销一次已经提交到Github的内容"></a>撤销一次已经提交到Github的内容</h5><figure class="highlight pgsql"><table><tr><td class="code"><pre><span class="line">git <span class="keyword">reset</span> <span class="comment">--hard HEAD~1</span></span><br><span class="line">git push <span class="comment">--force</span></span><br></pre></td></tr></table></figure>
+
+<p>该命令执行后，会隐藏掉Github库中的被撤销掉的记录，但是指定到该被隐藏掉的记录来访问，依旧可以访问。</p>
+<h5 id="GitHub更新自己fork的代码"><a href="#GitHub更新自己fork的代码" class="headerlink" title="GitHub更新自己fork的代码"></a>GitHub更新自己fork的代码</h5><ol>
+<li>clone已经fork到自己账号的代码</li>
+</ol>
+<figure class="highlight crmsh"><table><tr><td class="code"><pre><span class="line">git <span class="keyword">clone</span> <span class="title">https</span>://github.com/shadow000902/ApiTestEngine.git</span><br><span class="line">cd ApiTestEngine</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>查看远程分支列表</li>
+</ol>
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">╭─taoyi at TaoYi-Mac <span class="keyword">in</span> ~/git_projects/GitHub/ApiTestEngine on master✔ using ‹› <span class="number">17</span><span class="number">-08</span><span class="number">-23</span> - <span class="number">15</span>:<span class="number">01</span>:<span class="number">23</span></span><br><span class="line">╰─○ git remote -v</span><br><span class="line">debugtalk	https:<span class="comment">//github.com/debugtalk/ApiTestEngine.git (fetch)</span></span><br><span class="line">debugtalk	https:<span class="comment">//github.com/debugtalk/ApiTestEngine.git (push)</span></span><br><span class="line">origin	https:<span class="comment">//github.com/shadow000902/ApiTestEngine.git (fetch)</span></span><br><span class="line">origin	https:<span class="comment">//github.com/shadow000902/ApiTestEngine.git (push)</span></span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>fetch原始源代码的新版本到本地</li>
+</ol>
+<figure class="highlight ebnf"><table><tr><td class="code"><pre><span class="line"><span class="attribute">git fetch debugtalk</span></span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>合并两个版本的代码</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">git <span class="keyword">merge</span> debugtalk/<span class="keyword">master</span></span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li><p>如果合并代码后有冲突，解决冲突</p>
+</li>
+<li><p>把合并好的最新的代码提交到自己的GitHub账号上</p>
+</li>
+</ol>
+<figure class="highlight maxima"><table><tr><td class="code"><pre><span class="line">git <span class="built_in">push</span> <span class="built_in">origin</span> master</span><br></pre></td></tr></table></figure>
+
+<h5 id="git撤销最后一次commit"><a href="#git撤销最后一次commit" class="headerlink" title="git撤销最后一次commit"></a>git撤销最后一次commit</h5><ol>
+<li>使用git log查看commit记录</li>
+</ol>
+<figure class="highlight pgsql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">commit</span>-id1</span><br><span class="line"><span class="keyword">commit</span>-id2</span><br><span class="line"><span class="keyword">commit</span>-id3</span><br></pre></td></tr></table></figure>
+<p>如果想要撤销commit-id1的话，就要选择commit-id2</p>
+<ol start="2">
+<li>使用命令撤销提交</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">git <span class="keyword">reset</span> <span class="keyword">commit</span>-id2				<span class="comment"># 只是撤销提交，修改的内容不变</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight dsconfig"><table><tr><td class="code"><pre><span class="line"><span class="string">git </span><span class="string">reset </span><span class="built_in">--hard</span> <span class="string">commit-id2	</span>		<span class="comment"># 撤销提交，并撤销修改的内容</span></span><br><span class="line"><span class="string">git </span><span class="string">push </span><span class="string">origin </span><span class="string">HARD </span><span class="built_in">--force</span>		<span class="comment"># 撤销后，强制提交并push到远程分支</span></span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>修改最新一次已提交但未 push 的 message</li>
+</ol>
+<figure class="highlight pgsql"><table><tr><td class="code"><pre><span class="line">git <span class="keyword">commit</span> <span class="comment">--amend -m "your new message"</span></span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>git</category>
+      </categories>
+      <tags>
+        <tag>git</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hexo之显示当前浏览进度</title>
+    <url>/post/e28ea32e.html</url>
+    <content><![CDATA[<h2 id="显示当前浏览进度"><a href="#显示当前浏览进度" class="headerlink" title="显示当前浏览进度"></a>显示当前浏览进度</h2><p>修改<code>themes/*/_config.yml</code>，把 <code>false</code> 改为 <code>true</code>：</p>
+<a id="more"></a>
+
+
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Back to top in sidebar</span></span><br><span class="line"><span class="attr">b2t:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Scroll percent label in b2t button</span></span><br><span class="line"><span class="attr">scrollpercent:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>hexo建站</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hexo之主页文章添加边框阴影效果</title>
+    <url>/post/35232b4b.html</url>
+    <content><![CDATA[<h2 id="主页文章添加边框阴影效果"><a href="#主页文章添加边框阴影效果" class="headerlink" title="主页文章添加边框阴影效果"></a>主页文章添加边框阴影效果</h2><p>打开 <code>themes/*/source/css/_custom/custom.styl</code> ,向里面加代码:</p>
+<a id="more"></a>
+
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 主页文章添加阴影效果</span></span><br><span class="line">.post &#123;</span><br><span class="line">   margin-top: <span class="number">0</span>px;</span><br><span class="line">   margin-bottom: <span class="number">60</span>px;</span><br><span class="line">   padding: <span class="number">25</span>px;</span><br><span class="line">   -webkit-box-shadow: <span class="number">0</span> <span class="number">0</span> <span class="number">5</span>px rgba(<span class="number">202</span>, <span class="number">203</span>, <span class="number">203</span>, <span class="number">.5</span>);</span><br><span class="line">   -moz-box-shadow: <span class="number">0</span> <span class="number">0</span> <span class="number">5</span>px rgba(<span class="number">202</span>, <span class="number">203</span>, <span class="number">204</span>, <span class="number">.5</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<br>]]></content>
+      <categories>
+        <category>hexo建站</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hexo之修改访问URL路径</title>
+    <url>/post/e9980575.html</url>
+    <content><![CDATA[<h2 id="修改访问URL路径"><a href="#修改访问URL路径" class="headerlink" title="修改访问URL路径"></a>修改访问URL路径</h2><p>默认情况下访问URL路径为：<code>domain/2018/10/18/</code>关于本站,修改为 <code>domain/About/</code>关于本站。 编辑 Hexo 站点下的 <code>_config.yml</code> 文件，修改其中的 <code>permalink</code>字段：</p>
+<a id="more"></a>
+
+<figure class="highlight elixir"><table><tr><td class="code"><pre><span class="line"><span class="symbol">permalink:</span> <span class="symbol">:category/</span><span class="symbol">:title/</span></span><br></pre></td></tr></table></figure>
+
+<br>]]></content>
+      <categories>
+        <category>hexo建站</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hexo之博文置顶</title>
+    <url>/post/c53d9800.html</url>
+    <content><![CDATA[<h2 id="博文置顶"><a href="#博文置顶" class="headerlink" title="博文置顶"></a>博文置顶</h2><h4 id="1-安装插件"><a href="#1-安装插件" class="headerlink" title="1. 安装插件"></a>1. 安装插件</h4><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">$ npm <span class="keyword">uninstall</span> hexo-generator-<span class="keyword">index</span> <span class="comment">--save</span></span><br><span class="line">$ npm <span class="keyword">install</span> hexo-generator-<span class="keyword">index</span>-pin-top <span class="comment">--save</span></span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<p>然后在需要置顶的文章的Front-matter中加上<code>top</code>即可：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="number">2018</span></span><br><span class="line"><span class="attr">date:</span> <span class="number">2018</span><span class="number">-10</span><span class="number">-25</span> <span class="number">16</span><span class="string">:10:03</span></span><br><span class="line"><span class="attr">top:</span> <span class="number">10</span></span><br><span class="line"><span class="meta">---</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-设置置顶标志"><a href="#2-设置置顶标志" class="headerlink" title="2. 设置置顶标志"></a>2. 设置置顶标志</h4><p>打开：<code>/themes/*/layout/_macro/post.swig</code>，定位到</p>
+<figure class="highlight django"><table><tr><td class="code"><pre><span class="line"><span class="template-tag">&#123;% <span class="name"><span class="name">if</span></span> post.top %&#125;</span></span><br><span class="line"><span class="xml">  <span class="tag">&lt;<span class="name">i</span> <span class="attr">class</span>=<span class="string">"fa fa-thumb-tack"</span>&gt;</span><span class="tag">&lt;/<span class="name">i</span>&gt;</span></span></span><br><span class="line"><span class="xml">  <span class="tag">&lt;<span class="name">font</span> <span class="attr">color</span>=<span class="string">7D26CD</span>&gt;</span>置顶<span class="tag">&lt;/<span class="name">font</span>&gt;</span></span></span><br><span class="line"><span class="xml">  <span class="tag">&lt;<span class="name">span</span> <span class="attr">class</span>=<span class="string">"post-meta-divider"</span>&gt;</span>|<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span></span><br><span class="line"><span class="template-tag">&#123;% <span class="name"><span class="name">endif</span></span> %&#125;</span></span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>hexo建站</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hexo之静态资源压缩</title>
+    <url>/post/2299cf25.html</url>
+    <content><![CDATA[<h2 id="静态资源压缩"><a href="#静态资源压缩" class="headerlink" title="静态资源压缩"></a>静态资源压缩</h2><p>在<code>站点目录</code>下：</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line">$ npm <span class="keyword">install</span> gulp -g</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<p>安装<code>gulp</code>插件：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">npm <span class="keyword">install</span> gulp-minify-css <span class="comment">--save</span></span><br><span class="line">npm <span class="keyword">install</span> gulp-uglify <span class="comment">--save</span></span><br><span class="line">npm <span class="keyword">install</span> gulp-htmlmin <span class="comment">--save</span></span><br><span class="line">npm <span class="keyword">install</span> gulp-htmlclean <span class="comment">--save</span></span><br><span class="line">npm <span class="keyword">install</span> gulp-imagemin <span class="comment">--save</span></span><br></pre></td></tr></table></figure>
+
+<p>在 <code>Hexo 站点</code>下新建 <code>gulpfile.js</code>文件，文件内容如下：</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> gulp = <span class="built_in">require</span>(<span class="string">'gulp'</span>);</span><br><span class="line"><span class="keyword">var</span> minifycss = <span class="built_in">require</span>(<span class="string">'gulp-minify-css'</span>);</span><br><span class="line"><span class="keyword">var</span> uglify = <span class="built_in">require</span>(<span class="string">'gulp-uglify'</span>);</span><br><span class="line"><span class="keyword">var</span> htmlmin = <span class="built_in">require</span>(<span class="string">'gulp-htmlmin'</span>);</span><br><span class="line"><span class="keyword">var</span> htmlclean = <span class="built_in">require</span>(<span class="string">'gulp-htmlclean'</span>);</span><br><span class="line"><span class="keyword">var</span> imagemin = <span class="built_in">require</span>(<span class="string">'gulp-imagemin'</span>);</span><br><span class="line"><span class="comment">// 压缩css文件</span></span><br><span class="line">gulp.task(<span class="string">'minify-css'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> gulp.src(<span class="string">'./public/**/*.css'</span>)</span><br><span class="line">  .pipe(minifycss())</span><br><span class="line">  .pipe(gulp.dest(<span class="string">'./public'</span>));</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 压缩html文件</span></span><br><span class="line">gulp.task(<span class="string">'minify-html'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> gulp.src(<span class="string">'./public/**/*.html'</span>)</span><br><span class="line">  .pipe(htmlclean())</span><br><span class="line">  .pipe(htmlmin(&#123;</span><br><span class="line">    removeComments: <span class="literal">true</span>,</span><br><span class="line">    minifyJS: <span class="literal">true</span>,</span><br><span class="line">    minifyCSS: <span class="literal">true</span>,</span><br><span class="line">    minifyURLs: <span class="literal">true</span>,</span><br><span class="line">  &#125;))</span><br><span class="line">  .pipe(gulp.dest(<span class="string">'./public'</span>))</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 压缩js文件</span></span><br><span class="line">gulp.task(<span class="string">'minify-js'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> gulp.src([<span class="string">'./public/**/.js'</span>,<span class="string">'!./public/js/**/*min.js'</span>])</span><br><span class="line">        .pipe(uglify())</span><br><span class="line">        .pipe(gulp.dest(<span class="string">'./public'</span>));</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 压缩 public/demo 目录内图片</span></span><br><span class="line">gulp.task(<span class="string">'minify-images'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    gulp.src(<span class="string">'./public/demo/**/*.*'</span>)</span><br><span class="line">        .pipe(imagemin(&#123;</span><br><span class="line">           optimizationLevel: <span class="number">5</span>, <span class="comment">//类型：Number  默认：3  取值范围：0-7（优化等级）</span></span><br><span class="line">           progressive: <span class="literal">true</span>, <span class="comment">//类型：Boolean 默认：false 无损压缩jpg图片</span></span><br><span class="line">           interlaced: <span class="literal">false</span>, <span class="comment">//类型：Boolean 默认：false 隔行扫描gif进行渲染</span></span><br><span class="line">           multipass: <span class="literal">false</span>, <span class="comment">//类型：Boolean 默认：false 多次优化svg直到完全优化</span></span><br><span class="line">        &#125;))</span><br><span class="line">        .pipe(gulp.dest(<span class="string">'./public/uploads'</span>));</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 默认任务</span></span><br><span class="line">gulp.task(<span class="string">'default'</span>, [</span><br><span class="line">  <span class="string">'minify-html'</span>,<span class="string">'minify-css'</span>,<span class="string">'minify-js'</span>,<span class="string">'minify-images'</span></span><br><span class="line">]);</span><br></pre></td></tr></table></figure>
+
+<p>只需要每次在执行 <code>generate</code> 命令后执行 <code>gulp</code> 就可以实现对静态资源的压缩，压缩完成后执行 <code>deploy</code> 命令同步到服务器：</p>
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="attr">hexo</span> <span class="string">g</span></span><br><span class="line"><span class="attr">gulp</span></span><br><span class="line"><span class="attr">hexo</span> <span class="string">d</span></span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>hexo建站</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hexo之实现点击出现桃心效果</title>
+    <url>/post/862b573a.html</url>
+    <content><![CDATA[<h2 id="实现点击出现桃心效果"><a href="#实现点击出现桃心效果" class="headerlink" title="实现点击出现桃心效果"></a>实现点击出现桃心效果</h2><p><font style="font-size:18px;"> 在<code>/themes/*/source/js/src</code>下新建文件<code>click.js</code>，接着把以下粘贴到<code>click.js</code>文件中。</font></p>
+<a id="more"></a>
+
+
+<p><font style="font-size:18px;"> 代码如下：</font><br>  <figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">!<span class="function"><span class="keyword">function</span>(<span class="params">e,t,a</span>)</span>&#123;<span class="function"><span class="keyword">function</span> <span class="title">n</span>(<span class="params"></span>)</span>&#123;c(<span class="string">".heart&#123;width: 10px;height: 10px;position: fixed;background: #f00;transform: rotate(45deg);-webkit-transform: rotate(45deg);-moz-transform: rotate(45deg);&#125;.heart:after,.heart:before&#123;content: '';width: inherit;height: inherit;background: inherit;border-radius: 50%;-webkit-border-radius: 50%;-moz-border-radius: 50%;position: fixed;&#125;.heart:after&#123;top: -5px;&#125;.heart:before&#123;left: -5px;&#125;"</span>),o(),r()&#125;<span class="function"><span class="keyword">function</span> <span class="title">r</span>(<span class="params"></span>)</span>&#123;<span class="keyword">for</span>(<span class="keyword">var</span> e=<span class="number">0</span>;e&lt;d.length;e++)d[e].alpha&lt;=<span class="number">0</span>?(t.body.removeChild(d[e].el),d.splice(e,<span class="number">1</span>)):(d[e].y--,d[e].scale+=<span class="number">.004</span>,d[e].alpha-=<span class="number">.013</span>,d[e].el.style.cssText=<span class="string">"left:"</span>+d[e].x+<span class="string">"px;top:"</span>+d[e].y+<span class="string">"px;opacity:"</span>+d[e].alpha+<span class="string">";transform:scale("</span>+d[e].scale+<span class="string">","</span>+d[e].scale+<span class="string">") rotate(45deg);background:"</span>+d[e].color+<span class="string">";z-index:99999"</span>);requestAnimationFrame(r)&#125;<span class="function"><span class="keyword">function</span> <span class="title">o</span>(<span class="params"></span>)</span>&#123;<span class="keyword">var</span> t=<span class="string">"function"</span>==<span class="keyword">typeof</span> e.onclick&amp;&amp;e.onclick;e.onclick=<span class="function"><span class="keyword">function</span>(<span class="params">e</span>)</span>&#123;t&amp;&amp;t(),i(e)&#125;&#125;<span class="function"><span class="keyword">function</span> <span class="title">i</span>(<span class="params">e</span>)</span>&#123;<span class="keyword">var</span> a=t.createElement(<span class="string">"div"</span>);a.className=<span class="string">"heart"</span>,d.push(&#123;<span class="attr">el</span>:a,<span class="attr">x</span>:e.clientX<span class="number">-5</span>,<span class="attr">y</span>:e.clientY<span class="number">-5</span>,<span class="attr">scale</span>:<span class="number">1</span>,<span class="attr">alpha</span>:<span class="number">1</span>,<span class="attr">color</span>:s()&#125;),t.body.appendChild(a)&#125;<span class="function"><span class="keyword">function</span> <span class="title">c</span>(<span class="params">e</span>)</span>&#123;<span class="keyword">var</span> a=t.createElement(<span class="string">"style"</span>);a.type=<span class="string">"text/css"</span>;<span class="keyword">try</span>&#123;a.appendChild(t.createTextNode(e))&#125;<span class="keyword">catch</span>(t)&#123;a.styleSheet.cssText=e&#125;t.getElementsByTagName(<span class="string">"head"</span>)[<span class="number">0</span>].appendChild(a)&#125;<span class="function"><span class="keyword">function</span> <span class="title">s</span>(<span class="params"></span>)</span>&#123;<span class="keyword">return</span><span class="string">"rgb("</span>+~~(<span class="number">255</span>*<span class="built_in">Math</span>.random())+<span class="string">","</span>+~~(<span class="number">255</span>*<span class="built_in">Math</span>.random())+<span class="string">","</span>+~~(<span class="number">255</span>*<span class="built_in">Math</span>.random())+<span class="string">")"</span>&#125;<span class="keyword">var</span> d=[];e.requestAnimationFrame=<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;<span class="keyword">return</span> e.requestAnimationFrame||e.webkitRequestAnimationFrame||e.mozRequestAnimationFrame||e.oRequestAnimationFrame||e.msRequestAnimationFrame||<span class="function"><span class="keyword">function</span>(<span class="params">e</span>)</span>&#123;setTimeout(e,<span class="number">1e3</span>/<span class="number">60</span>)&#125;&#125;(),n()&#125;(<span class="built_in">window</span>,<span class="built_in">document</span>);</span><br></pre></td></tr></table></figure></p>
+<p><font style="font-size:18px;">在<code>\themes\*\layout\_layout.swig</code>文件末尾添加:</font></p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 页面点击小红心 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span> <span class="attr">src</span>=<span class="string">"/js/src/clicklove.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>hexo建站</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hexo之网站标题栏背景颜色</title>
+    <url>/post/91a443ec.html</url>
+    <content><![CDATA[<h2 id="网站标题栏背景颜色"><a href="#网站标题栏背景颜色" class="headerlink" title="网站标题栏背景颜色"></a>网站标题栏背景颜色</h2><p>打开 <code>themes/*/source/css/_custom/custom.styl</code> ,在里面写下如下代码：</p>
+<a id="more"></a>
+
+<figure class="highlight scss"><table><tr><td class="code"><pre><span class="line"><span class="selector-class">.site-meta</span> &#123;</span><br><span class="line">  <span class="attribute">background</span>: <span class="variable">$blue</span>; <span class="comment">//修改为自己喜欢的颜色</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>hexo建站</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hexo之修改内容区域的宽度</title>
+    <url>/post/e20d3e6e.html</url>
+    <content><![CDATA[<h2 id="修改内容区域的宽度"><a href="#修改内容区域的宽度" class="headerlink" title="修改内容区域的宽度"></a>修改内容区域的宽度</h2><p>编辑主题的 <code>source/css/_variables/custom.styl</code> 文件，新增变量：</p>
+<a id="more"></a>
+
+<figure class="highlight gams"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 修改成你期望的宽度</span></span><br><span class="line"><span class="meta"><span class="meta-keyword">$content</span>-desktop = 700px</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 当视窗超过 1600px 后的宽度</span></span><br><span class="line"><span class="meta"><span class="meta-keyword">$content</span>-desktop-large = 900px</span></span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>hexo建站</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hexo之修改Logo字体</title>
+    <url>/post/6d38bae0.html</url>
+    <content><![CDATA[<h2 id="修改Logo字体"><a href="#修改Logo字体" class="headerlink" title="修改Logo字体"></a>修改Logo字体</h2><p>在 <code>themes/*/source/css/_custom/custom.styl</code> 中添加如下代码：</p>
+<a id="more"></a>
+
+<figure class="highlight css"><table><tr><td class="code"><pre><span class="line"><span class="keyword">@font-face</span> &#123;</span><br><span class="line">    <span class="attribute">font-family</span>: Zitiming;</span><br><span class="line">    <span class="attribute">src</span>: <span class="built_in">url</span>(<span class="string">'/fonts/Zitiming.ttf'</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="selector-class">.site-title</span> &#123;</span><br><span class="line">    <span class="attribute">font-size</span>: <span class="number">40px</span> <span class="meta">!important</span>;</span><br><span class="line">	<span class="attribute">font-family</span>: <span class="string">'Zitiming'</span> <span class="meta">!important</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中字体文件在 <code>themes/next/source/fonts</code> 目录下，里面有个 <code>.gitkeep</code> 的隐藏文件，打开写入你要保留的字体文件，比如我的是就是写入 <code>Zitiming.ttf</code> ，具体字库自己从网上下载即可。</p>
+]]></content>
+      <categories>
+        <category>hexo建站</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hexo之添加背景图</title>
+    <url>/post/2db94f1a.html</url>
+    <content><![CDATA[<h2 id="添加背景图"><a href="#添加背景图" class="headerlink" title="添加背景图"></a>添加背景图</h2><p>在 <code>themes/*/source/css/_custom/custom.styl</code> 中添加如下代码：</p>
+<a id="more"></a>
+
+<figure class="highlight css"><table><tr><td class="code"><pre><span class="line"><span class="selector-tag">body</span>&#123;</span><br><span class="line">    <span class="attribute">background</span>:<span class="built_in">url</span>(/images/bg.jpg);</span><br><span class="line">    <span class="attribute">background-size</span>:cover;</span><br><span class="line">    <span class="attribute">background-repeat</span>:no-repeat;</span><br><span class="line">    <span class="attribute">background-attachment</span>:fixed;</span><br><span class="line">    <span class="attribute">background-position</span>:center;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>hexo建站</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hexo之文章加密访问</title>
+    <url>/post/78491cc3.html</url>
+    <content><![CDATA[<h2 id="文章加密访问"><a href="#文章加密访问" class="headerlink" title="文章加密访问"></a>文章加密访问</h2><p>打开 <code>themes/*/layout/_partials/head.swig</code>文件,在 之前插入代码：</p>
+<a id="more"></a>
+
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="actionscript">    (<span class="function"><span class="keyword">function</span><span class="params">()</span></span>&#123;</span></span><br><span class="line"><span class="actionscript">        <span class="keyword">if</span>(<span class="string">'&#123;&#123; page.password &#125;&#125;'</span>)&#123;</span></span><br><span class="line"><span class="actionscript">            <span class="keyword">if</span> (prompt(<span class="string">'请输入密码'</span>) !== <span class="string">'&#123;&#123; page.password &#125;&#125;'</span>)&#123;</span></span><br><span class="line"><span class="actionscript">                alert(<span class="string">'密码错误'</span>);</span></span><br><span class="line">                history.back();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)();</span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>写文章时加上<code>password: *</code>：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="number">2018</span></span><br><span class="line"><span class="attr">date:</span> <span class="number">2018</span><span class="number">-10</span><span class="number">-25</span> <span class="number">16</span><span class="string">:10:03</span></span><br><span class="line"><span class="attr">password:</span> <span class="number">123456</span></span><br><span class="line"><span class="meta">---</span></span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>hexo建站</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Eclipse安装SVN插件的几种方式</title>
+    <url>/post/ddb18259.html</url>
+    <content><![CDATA[<h2 id="SVN"><a href="#SVN" class="headerlink" title="SVN"></a>SVN</h2><h4 id="方式一：通过Eclipse-Marketplace在线安装"><a href="#方式一：通过Eclipse-Marketplace在线安装" class="headerlink" title="方式一：通过Eclipse Marketplace在线安装"></a><font color="red">方式一：通过Eclipse Marketplace在线安装</font></h4><p>  Help–&gt;Eclipse Marketplace，搜索svn</p>
+  <a id="more"></a>
+
+
+  <img src="/post/ddb18259/em_svn_1.png" style="margin-left:10px;">
+
+  <img src="/post/ddb18259/em_svn_2.png" style="margin-left:10px;">
+  点击Install开始安装
+  <img src="/post/ddb18259/em_svn_3.png" style="margin-left:10px;">
+  一步一步往下点，然后接受协议，安装完成后重启eclipse即可生效。
+
+<h4 id="方式二：通过Install-New-Software在线安装"><a href="#方式二：通过Install-New-Software在线安装" class="headerlink" title="方式二：通过Install New Software在线安装"></a><font color="red">方式二：通过Install New Software在线安装</font></h4><p>  Help -&gt; Install New Software</p>
+<p>  点击add按钮，在弹出窗口中，输入name(自己为变量命的名)和插件的URL，然后点击add</p>
+<p>  SVN插件与Subversion版本的对应关系如下：</p>
+<p>  <a href="http://subclipse.tigris.org/update_1.6.x/" target="_blank" rel="noopener">http://subclipse.tigris.org/update_1.6.x/</a> （Subversion 1.6.x）</p>
+<p>  <a href="http://subclipse.tigris.org/update_1.8.x/" target="_blank" rel="noopener">http://subclipse.tigris.org/update_1.8.x/</a> （Subversion 1.7.x）</p>
+<p>  <a href="http://subclipse.tigris.org/update_1.10.x/" target="_blank" rel="noopener">http://subclipse.tigris.org/update_1.10.x/</a> （Subversion 1.8.x）</p>
+<p>  <a href="https://dl.bintray.com/subclipse/releases/subclipse/4.2.x/" target="_blank" rel="noopener">https://dl.bintray.com/subclipse/releases/subclipse/4.2.x/</a> （Subversion 1.9.x）</p>
+  <img src="/post/ddb18259/em_svn_4.png" style="margin-left:10px;">
+
+<p>  全部勾选，然后点击Next</p>
+  <img src="/post/ddb18259/em_svn_5.png" style="margin-left:10px;">
+
+<p>  一步一步往下点，然后接受协议，安装完成后重启eclipse即可生效。</p>
+<h4 id="方式三：通过下载插件，离线安装"><a href="#方式三：通过下载插件，离线安装" class="headerlink" title="方式三：通过下载插件，离线安装"></a><font color="red">方式三：通过下载插件，离线安装</font></h4><p>   1、下载需要的插件包，<a href="https://github.com/subclipse/subclipse/wiki" target="_blank" rel="noopener">https://github.com/subclipse/subclipse/wiki</a></p>
+   <img src="/post/ddb18259/em_svn_6.png" style="margin-left:10px;">
+
+<p>   这里有最新版的插件下载地址，也有旧版本的插件下载地址，根据自己的需要选择下载。</p>
+   <img src="/post/ddb18259/em_svn_7.png" style="margin-left:10px;">
+
+<p>   下载的包里会有”plugins”和”features”两个文件夹</p>
+   <img src="/post/ddb18259/em_svn_8.png" style="margin-left:10px;">
+
+<p>   2、找到eclipse目录下”plugins”和”features”文件夹，将下载好的的svn插件对应名称文件夹下的内容复制到eclipse的同名文件夹中</p>
+<p>   3、重启eclipse即可生效</p>
+]]></content>
+      <categories>
+        <category>eclipse</category>
+      </categories>
+      <tags>
+        <tag>eclipse</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>idea注册码</title>
+    <url>/post/90442fa1.html</url>
+    <content><![CDATA[<h2 id="以下注册码仅供参考"><a href="#以下注册码仅供参考" class="headerlink" title="以下注册码仅供参考"></a>以下注册码仅供参考</h2><h4 id="2020年4月5日"><a href="#2020年4月5日" class="headerlink" title="2020年4月5日"></a>2020年4月5日</h4><figure class="highlight gcode"><table><tr><td class="code"><pre><span class="line">M<span class="symbol">NQ043</span>JMTU-eyJsaW<span class="symbol">NlbnNlSWQiOiJNTlEwNDNKTVRVIiwibGljZW5</span>zZWVOYW<span class="number">1</span>lIjoiR<span class="number">1</span>VPIEJJTiIsImFzc<span class="number">2</span>l<span class="symbol">nbmVlTmFtZSI6</span>IiIsImFzc<span class="number">2</span>l<span class="symbol">nbmVlRW1</span>haWwiOiIiLCJsaW<span class="symbol">NlbnNlUmVzdHJpY3</span>Rpb<span class="number">24</span>iOiIiLCJjaGVja<span class="number">0</span><span class="symbol">NvbmN1</span>c<span class="symbol">nJlbnRVc2</span>UiOmZhbH<span class="symbol">NlLCJwcm9</span>kdW<span class="symbol">N0</span>cyI<span class="number">6</span>W<span class="number">3</span>siY<span class="number">29</span>kZSI<span class="number">6</span>IklJIiwiZmFsbGJhY<span class="number">2</span>tEYXRlIjoiMjAxOS<span class="number">0</span>w<span class="symbol">NC0</span>w<span class="symbol">NSIsInBhaWRVcFRvIjoiMjAyMC0</span>w<span class="symbol">NC0</span>w<span class="symbol">NCJ9</span>XSwiaGFzaCI<span class="number">6</span>IjEy<span class="symbol">NjIxNDIwLzAiLCJncmFjZVBlcmlvZERheXMiOjcsImF1</span>d<span class="name">G9</span>Qc<span class="name">m9</span>sb<span class="number">25</span><span class="symbol">nYXRlZCI6</span>ZmFsc<span class="number">2</span>UsImlzQXV<span class="number">0</span>b<span class="number">1</span>Byb<span class="number">2</span>xvbmdhdGVkIjpmYWxzZX<span class="number">0</span>=-tltrJHc<span class="number">5</span>lqCKL<span class="symbol">nza1</span>bcLhMzDkfJeBqhRWb<span class="attr">vcrPF9</span>Gqo+X+iFWeKQXoEUOlr<span class="name">G38</span>uSzzmX<span class="number">05</span>ph<span class="comment">//PgXgyVfP5RXKsaRMfrv/thoouS5sA0aTemm3z6uRiFirTDj60KSGr5XZoP/WAXO4nuti6SRKZUbr/VSAtRPQRiCJvevq+3gWPDGu2aZ0AemiNLq4qIVWH3wxTN7lK2h5uJssZsyy35Yy9O703c5PFU0fxCj2HRgXq7H/91X+ZNLvvAZAVU9B7bOqnY4ZzNNV/cjY8B5gNo53Lo6s2szEV7DsZ+8e7k8P4Yo81DKxneCBoe4wiZmRaCIT6wK3/27KrtQTFMcGeZMA==-MIIElTCCAn2gAwIBAgIBCTANBgkqhkiG9w0BAQsFADAYMRYwFAYDVQQDDA1KZXRQcm9maWxlIENBMB4XDTE4MTEwMTEyMjk0NloXDTIwMTEwMjEyMjk0NlowaDELMAkGA1UEBhMCQ1oxDjAMBgNVBAgMBU51c2xlMQ8wDQYDVQQHDAZQcmFndWUxGTAXBgNVBAoMEEpldEJyYWlucyBzLnIuby4xHTAbBgNVBAMMFHByb2QzeS1mcm9tLTIwMTgxMTAxMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxcQkq+zdxlR2mmRYBPzGbUNdMN6OaXiXzxIWtMEkrJMO/5oUfQJbLLuMSMK0QHFmaI37WShyxZcfRCidwXjot4zmNBKnlyHodDij/78TmVqFl8nOeD5+07B8VEaIu7c3E1N+e1doC6wht4I4+IEmtsPAdoaj5WCQVQbrI8KeT8M9VcBIWX7fD0fhexfg3ZRt0xqwMcXGNp3DdJHiO0rCdU+Itv7EmtnSVq9jBG1usMSFvMowR25mju2JcPFp1+I4ZI+FqgR8gyG8oiNDyNEoAbsR3lOpI7grUYSvkB/xVy/VoklPCK2h0f0GJxFjnye8NT1PAywoyl7RmiAVRE/EKwIDAQABo4GZMIGWMAkGA1UdEwQCMAAwHQYDVR0OBBYEFGEpG9oZGcfLMGNBkY7SgHiMGgTcMEgGA1UdIwRBMD+AFKOetkhnQhI2Qb1t4Lm0oFKLl/GzoRykGjAYMRYwFAYDVQQDDA1KZXRQcm9maWxlIENBggkA0myxg7KDeeEwEwYDVR0lBAwwCgYIKwYBBQUHAwEwCwYDVR0PBAQDAgWgMA0GCSqGSIb3DQEBCwUAA4ICAQAF8uc+YJOHHwOFcPzmbjcxNDuGoOUIP+2h1R75Lecswb7ru2LWWSUMtXVKQzChLNPn/72W0k+oI056tgiwuG7M49LXp4zQVlQnFmWU1wwGvVhq5R63Rpjx1zjGUhcXgayu7+9zMUW596Lbomsg8qVve6euqsrFicYkIIuUu4zYPndJwfe0YkS5nY72SHnNdbPhEnN8wcB2Kz+OIG0lih3yz5EqFhld03bGp222ZQCIghCTVL6QBNadGsiN/lWLl4JdR3lJkZzlpFdiHijoVRdWeSWqM4y0t23c92HXKrgppoSV18XMxrWVdoSM3nuMHwxGhFyde05OdDtLpCv+jlWf5REAHHA201pAU6bJSZINyHDUTB+Beo28rRXSwSh3OUIvYwKNVeoBY+KwOJ7WnuTCUq1meE6GkKc4D/cXmgpOyW/1SmBz3XjVIi/zprZ0zf3qH5mkphtg6ksjKgKjmx1cXfZAAX6wcDBNaCL+Ortep1Dh8xDUbqbBVNBL4jbiL3i3xsfNiyJgaZ5sX7i8tmStEpLbPwvHcByuf59qJhV/bZOl8KqJBETCDJcY6O2aqhTUy+9x93ThKs1GKrRPePrWPluud7ttlgtRveit/pcBrnQcXOl1rHq7ByB8CFAxNotRUYL9IF5n3wJOgkPojMy6jetQA5Ogc8Sm7RG6vg1yow==</span></span><br></pre></td></tr></table></figure>
+
+
+<a id="more"></a>
+
+<h4 id="2020年3月11日"><a href="#2020年3月11日" class="headerlink" title="2020年3月11日"></a>2020年3月11日</h4><figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="number">56</span>ZS5PQ1RF-eyJsaWNlbnNlSWQiOiI1NlpTNVBRMVJGIiwibGljZW5zZWVOYW1lIjoi5q2j54mI5o6I5p2DIC4iLCJhc3NpZ25lZU5hbWUiOiIiLCJhc3NpZ25lZUVtYWlsIjoiIiwibGljZW5zZVJlc3RyaWN0aW9uIjoiRm9yIGVkdWNhdGlvbmFsIHVzZSBvbmx5IiwiY2hlY2tDb25jdXJyZW50VXNlIjpmYWxzZSwicHJvZHVjdHMiOlt7ImNvZGUiOiJJSSIsInBhaWRVcFRvIjoiMjAyMC0wMy0xMCJ9LHsiY29kZSI6IkFDIiwicGFpZFVwVG8iOiIyMDIwLTAzLTEwIn0seyJjb2RlIjoiRFBOIiwicGFpZFVwVG8iOiIyMDIwLTAzLTEwIn0seyJjb2RlIjoiUFMiLCJwYWlkVXBUbyI6IjIwMjAtMDMtMTAifSx7ImNvZGUiOiJHTyIsInBhaWRVcFRvIjoiMjAyMC0wMy0xMCJ9LHsiY29kZSI6IkRNIiwicGFpZFVwVG8iOiIyMDIwLTAzLTEwIn0seyJjb2RlIjoiQ0wiLCJwYWlkVXBUbyI6IjIwMjAtMDMtMTAifSx7ImNvZGUiOiJSUzAiLCJwYWlkVXBUbyI6IjIwMjAtMDMtMTAifSx7ImNvZGUiOiJSQyIsInBhaWRVcFRvIjoiMjAyMC0wMy0xMCJ9LHsiY29kZSI6IlJEIiwicGFpZFVwVG8iOiIyMDIwLTAzLTEwIn0seyJjb2RlIjoiUEMiLCJwYWlkVXBUbyI6IjIwMjAtMDMtMTAifSx7ImNvZGUiOiJSTSIsInBhaWRVcFRvIjoiMjAyMC0wMy0xMCJ9LHsiY29kZSI6IldTIiwicGFpZFVwVG8iOiIyMDIwLTAzLTEwIn0seyJjb2RlIjoiREIiLCJwYWlkVXBUbyI6IjIwMjAtMDMtMTAifSx7ImNvZGUiOiJEQyIsInBhaWRVcFRvIjoiMjAyMC0wMy0xMCJ9LHsiY29kZSI6IlJTVSIsInBhaWRVcFRvIjoiMjAyMC0wMy0xMCJ9XSwiaGFzaCI6IjEyMjkxNDk4LzAiLCJncmFjZVBlcmlvZERheXMiOjAsImF1dG9Qcm9sb25nYXRlZCI6ZmFsc2UsImlzQXV0b1Byb2xvbmdhdGVkIjpmYWxzZX0=-SYSsDcgL1WJmHnsiGaHUWbaZLPIe2oI3QiIneDtaIbh/SZOqu63G7RGudSjf3ssPb1zxroMti/bK9II1ugHz/nTjw31Uah7D0HqeaCO7Zc0q9BeHysiWmBZ+<span class="number">8</span>bABs5vr25GgIa5pO7CJhL7RitXQbWpAajrMBAeZ2En3wCgNwT6D6hNmiMlhXsWgwkw2OKnyHZ2dl8yEL+oV5SW14t7bdjYGKQrYjSd4+<span class="number">2</span>zc4FnaX88yLnGNO9B3U6G+BuM37pxS5MjHrkHqMTK8W3I66mIj6IB6dYXD5nvKKO1OZREBAr6LV0BqRYSbuJKFhZ8nd6YDG20GvW6leimv0rHVBFmA0w==-MIIElTCCAn2gAwIBAgIBCTANBgkqhkiG9w0BAQsFADAYMRYwFAYDVQQDDA1KZXRQcm9maWxlIENBMB4XDTE4MTEwMTEyMjk0NloXDTIwMTEwMjEyMjk0NlowaDELMAkGA1UEBhMCQ1oxDjAMBgNVBAgMBU51c2xlMQ8wDQYDVQQHDAZQcmFndWUxGTAXBgNVBAoMEEpldEJyYWlucyBzLnIuby4xHTAbBgNVBAMMFHByb2QzeS1mcm9tLTIwMTgxMTAxMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxcQkq+zdxlR2mmRYBPzGbUNdMN6OaXiXzxIWtMEkrJMO/<span class="number">5</span>oUfQJbLLuMSMK0QHFmaI37WShyxZcfRCidwXjot4zmNBKnlyHodDij/<span class="number">78</span>TmVqFl8nOeD5+<span class="number">07</span>B8VEaIu7c3E1N+e1doC6wht4I4+IEmtsPAdoaj5WCQVQbrI8KeT8M9VcBIWX7fD0fhexfg3ZRt0xqwMcXGNp3DdJHiO0rCdU+Itv7EmtnSVq9jBG1usMSFvMowR25mju2JcPFp1+I4ZI+FqgR8gyG8oiNDyNEoAbsR3lOpI7grUYSvkB/xVy/VoklPCK2h0f0GJxFjnye8NT1PAywoyl7RmiAVRE/EKwIDAQABo4GZMIGWMAkGA1UdEwQCMAAwHQYDVR0OBBYEFGEpG9oZGcfLMGNBkY7SgHiMGgTcMEgGA1UdIwRBMD+AFKOetkhnQhI2Qb1t4Lm0oFKLl/GzoRykGjAYMRYwFAYDVQQDDA1KZXRQcm9maWxlIENBggkA0myxg7KDeeEwEwYDVR0lBAwwCgYIKwYBBQUHAwEwCwYDVR0PBAQDAgWgMA0GCSqGSIb3DQEBCwUAA4ICAQAF8uc+YJOHHwOFcPzmbjcxNDuGoOUIP+<span class="number">2</span>h1R75Lecswb7ru2LWWSUMtXVKQzChLNPn/<span class="number">72</span>W0k+oI056tgiwuG7M49LXp4zQVlQnFmWU1wwGvVhq5R63Rpjx1zjGUhcXgayu7+<span class="number">9</span>zMUW596Lbomsg8qVve6euqsrFicYkIIuUu4zYPndJwfe0YkS5nY72SHnNdbPhEnN8wcB2Kz+OIG0lih3yz5EqFhld03bGp222ZQCIghCTVL6QBNadGsiN/lWLl4JdR3lJkZzlpFdiHijoVRdWeSWqM4y0t23c92HXKrgppoSV18XMxrWVdoSM3nuMHwxGhFyde05OdDtLpCv+jlWf5REAHHA201pAU6bJSZINyHDUTB+Beo28rRXSwSh3OUIvYwKNVeoBY+KwOJ7WnuTCUq1meE6GkKc4D/cXmgpOyW/<span class="number">1</span>SmBz3XjVIi/zprZ0zf3qH5mkphtg6ksjKgKjmx1cXfZAAX6wcDBNaCL+Ortep1Dh8xDUbqbBVNBL4jbiL3i3xsfNiyJgaZ5sX7i8tmStEpLbPwvHcByuf59qJhV/bZOl8KqJBETCDJcY6O2aqhTUy+<span class="number">9</span>x93ThKs1GKrRPePrWPluud7ttlgtRveit/pcBrnQcXOl1rHq7ByB8CFAxNotRUYL9IF5n3wJOgkPojMy6jetQA5Ogc8Sm7RG6vg1yow==</span><br></pre></td></tr></table></figure>
+
+<br>
+
+
+<blockquote>
+<p>其他相关链接</p>
+<blockquote>
+<p><a href="https://songzixian.com/" target="_blank" rel="noopener">宋子宪博客</a><br><a href="https://zhile.io/2018/08/25/jetbrains-license-server-crack.html" target="_blank" rel="noopener">知了</a></p>
+</blockquote>
+</blockquote>
+]]></content>
+      <categories>
+        <category>idea</category>
+      </categories>
+      <tags>
+        <tag>idea</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>hexo之基本操作</title>
+    <url>/post/343aa4a8.html</url>
+    <content><![CDATA[<h2 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h2><pre><code>git
+
+Node.js</code></pre><h4 id="Hexo安装：npm-install-hexo-g"><a href="#Hexo安装：npm-install-hexo-g" class="headerlink" title="Hexo安装：npm install hexo -g"></a>Hexo安装：npm install hexo -g</h4><a id="more"></a>
+
+<p>安装完成后检查：<code>hexo -v</code></p>
+<h6 id="Hexo基本操作"><a href="#Hexo基本操作" class="headerlink" title="Hexo基本操作"></a>Hexo基本操作</h6><p>初始化文件夹：<code>hexo init</code></p>
+<p>开启服务器：<code>hexo s</code></p>
+<p>Ctrl+C为退出服务器，开启服务器后在 <a href="http://localhost:4000/" target="_blank" rel="noopener">http://localhost:4000/</a> 中预览博客</p>
+<p>清除缓存：<code>hexo clean</code></p>
+<p>生成页面：<code>hexo g</code></p>
+<p>上传到github：<code>hexo d</code></p>
+<p>查看帮助：<code>hexo help</code></p>
+<p>查看版本：<code>hexo version</code></p>
+<p>新建文章：<code>hexo new &quot;name&quot;</code></p>
+<p>新建页面：<code>hexo new page &quot;name&quot;</code></p>
+<p>安装插件：<code>npm install --save hexo-admin(插件名)</code></p>
+<p>卸载插件：<code>npm uninstall hexo-admin(插件名)</code></p>
+<h6 id="其他配置"><a href="#其他配置" class="headerlink" title="其他配置"></a>其他配置</h6><p>ssh key</p>
+<blockquote>
+<p>hexo主要配置文件：_config.yml</p>
+</blockquote>
+<p>首次上传到github安装插件：<code>npm install hexo-deployer-git --save</code></p>
+<h6 id="添加图片"><a href="#添加图片" class="headerlink" title="添加图片"></a>添加图片</h6><p><code>npm install https://github.com/CodeFalling/hexo-asset-image --save</code></p>
+<blockquote>
+<p>配置文件：post_asset_folder: true</p>
+</blockquote>
+<p>坑点：图片链接要写”/“，不要写”&quot;</p>
+]]></content>
+      <categories>
+        <category>hexo建站</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>hexo之踩坑</title>
+    <url>/post/ad07d2fa.html</url>
+    <content><![CDATA[<h3 id="hexo-本身-marldown不好用"><a href="#hexo-本身-marldown不好用" class="headerlink" title="hexo 本身 marldown不好用"></a>hexo 本身 marldown不好用</h3><h5 id="hexo-renderer-markdown-it-插件"><a href="#hexo-renderer-markdown-it-插件" class="headerlink" title="hexo-renderer-markdown-it 插件"></a>hexo-renderer-markdown-it 插件</h5><p>为了更好地写markdown文档</p>
+<figure class="highlight applescript"><table><tr><td class="code"><pre><span class="line">npm un hexo-renderer-marked <span class="comment">--save</span></span><br><span class="line">npm i hexo-renderer-markdown-<span class="keyword">it</span> <span class="comment">--save</span></span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+
+<p>添加到<code>根目录</code>_config.yml文件</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Markdown-it config</span></span><br><span class="line"><span class="comment">## Docs: https://github.com/celsomiranda/hexo-renderer-markdown-it/wiki</span></span><br><span class="line"><span class="attr">markdown:</span></span><br><span class="line">  <span class="attr">render:</span></span><br><span class="line">    <span class="attr">html:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">xhtmlOut:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">breaks:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">linkify:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">typographer:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">quotes:</span> <span class="string">'“”‘’'</span></span><br><span class="line">  <span class="attr">plugins:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">markdown-it-abbr</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">markdown-it-footnote</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">markdown-it-ins</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">markdown-it-sub</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">markdown-it-sup</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">markdown-it-emoji</span>  <span class="comment"># add emoji</span></span><br><span class="line">  <span class="attr">anchors:</span></span><br><span class="line">    <span class="attr">level:</span> <span class="number">2</span></span><br><span class="line">    <span class="attr">collisionSuffix:</span> <span class="string">'v'</span></span><br><span class="line">    <span class="attr">permalink:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">permalinkClass:</span> <span class="string">header-anchor</span></span><br><span class="line">    <span class="attr">permalinkSymbol:</span> <span class="string">¶</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>hexo建站</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>hexo之图片问题</title>
+    <url>/post/172c7c2b.html</url>
+    <content><![CDATA[<h5 id="一、插件安装与配置"><a href="#一、插件安装与配置" class="headerlink" title="一、插件安装与配置"></a>一、插件安装与配置</h5><p>首先我们需要安装一个图片路径转换的插件，这个插件名字是hexo-asset-image</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ npm install https://github.com/CodeFalling/hexo-asset-image --save</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<p>但是这个插件的内容需要修改【不然可能会出Bug】</p>
+<p>打开/node_modules/hexo-asset-image/index.js，将内容更换为下面的代码</p>
+<figure class="highlight javascript"><figcaption><span>完整代码</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"><span class="keyword">var</span> cheerio = <span class="built_in">require</span>(<span class="string">'cheerio'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// http://stackoverflow.com/questions/14480345/how-to-get-the-nth-occurrence-in-a-string</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getPosition</span>(<span class="params">str, m, i</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> str.split(m, i).join(m).length;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> version = <span class="built_in">String</span>(hexo.version).split(<span class="string">'.'</span>);</span><br><span class="line">hexo.extend.filter.register(<span class="string">'after_post_render'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123;</span><br><span class="line">  <span class="keyword">var</span> config = hexo.config;</span><br><span class="line">  <span class="keyword">if</span>(config.post_asset_folder)&#123;</span><br><span class="line">    	<span class="keyword">var</span> link = data.permalink;</span><br><span class="line">	<span class="keyword">if</span>(version.length &gt; <span class="number">0</span> &amp;&amp; <span class="built_in">Number</span>(version[<span class="number">0</span>]) == <span class="number">3</span>)</span><br><span class="line">	   <span class="keyword">var</span> beginPos = getPosition(link, <span class="string">'/'</span>, <span class="number">1</span>) + <span class="number">1</span>;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">	   <span class="keyword">var</span> beginPos = getPosition(link, <span class="string">'/'</span>, <span class="number">3</span>) + <span class="number">1</span>;</span><br><span class="line">	<span class="comment">// In hexo 3.1.1, the permalink of "about" page is like ".../about/index.html".</span></span><br><span class="line">	<span class="keyword">var</span> endPos = link.lastIndexOf(<span class="string">'/'</span>) + <span class="number">1</span>;</span><br><span class="line">    link = link.substring(beginPos, endPos);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> toprocess = [<span class="string">'excerpt'</span>, <span class="string">'more'</span>, <span class="string">'content'</span>];</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; toprocess.length; i++)&#123;</span><br><span class="line">      <span class="keyword">var</span> key = toprocess[i];</span><br><span class="line"> </span><br><span class="line">      <span class="keyword">var</span> $ = cheerio.load(data[key], &#123;</span><br><span class="line">        ignoreWhitespace: <span class="literal">false</span>,</span><br><span class="line">        xmlMode: <span class="literal">false</span>,</span><br><span class="line">        lowerCaseTags: <span class="literal">false</span>,</span><br><span class="line">        decodeEntities: <span class="literal">false</span></span><br><span class="line">      &#125;);</span><br><span class="line"></span><br><span class="line">      $(<span class="string">'img'</span>).each(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">		<span class="keyword">if</span> ($(<span class="keyword">this</span>).attr(<span class="string">'src'</span>))&#123;</span><br><span class="line">			<span class="comment">// For windows style path, we replace '\' to '/'.</span></span><br><span class="line">			<span class="keyword">var</span> src = $(<span class="keyword">this</span>).attr(<span class="string">'src'</span>).replace(<span class="string">'\\'</span>, <span class="string">'/'</span>);</span><br><span class="line">			<span class="keyword">if</span>(!<span class="regexp">/http[s]*.*|\/\/.*/</span>.test(src) &amp;&amp;</span><br><span class="line">			   !<span class="regexp">/^\s*\//</span>.test(src)) &#123;</span><br><span class="line">			  <span class="comment">// For "about" page, the first part of "src" can't be removed.</span></span><br><span class="line">			  <span class="comment">// In addition, to support multi-level local directory.</span></span><br><span class="line">			  <span class="keyword">var</span> linkArray = link.split(<span class="string">'/'</span>).filter(<span class="function"><span class="keyword">function</span>(<span class="params">elem</span>)</span>&#123;</span><br><span class="line">				<span class="keyword">return</span> elem != <span class="string">''</span>;</span><br><span class="line">			  &#125;);</span><br><span class="line">			  <span class="keyword">var</span> srcArray = src.split(<span class="string">'/'</span>).filter(<span class="function"><span class="keyword">function</span>(<span class="params">elem</span>)</span>&#123;</span><br><span class="line">				<span class="keyword">return</span> elem != <span class="string">''</span> &amp;&amp; elem != <span class="string">'.'</span>;</span><br><span class="line">			  &#125;);</span><br><span class="line">			  <span class="keyword">if</span>(srcArray.length &gt; <span class="number">1</span>)</span><br><span class="line">				srcArray.shift();</span><br><span class="line">			  src = srcArray.join(<span class="string">'/'</span>);</span><br><span class="line">			  $(<span class="keyword">this</span>).attr(<span class="string">'src'</span>, config.root + link + src);</span><br><span class="line">			  <span class="built_in">console</span>.info&amp;&amp;<span class="built_in">console</span>.info(<span class="string">"update link as:--&gt;"</span>+config.root + link + src);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">			<span class="built_in">console</span>.info&amp;&amp;<span class="built_in">console</span>.info(<span class="string">"no src attr, skipped..."</span>);</span><br><span class="line">			<span class="built_in">console</span>.info&amp;&amp;<span class="built_in">console</span>.info($(<span class="keyword">this</span>));</span><br><span class="line">		&#125;</span><br><span class="line">      &#125;);</span><br><span class="line">      data[key] = $.html();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>打开_config.yml文件，修改下述内容</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">post_asset_folder: <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="二、问题推测"><a href="#二、问题推测" class="headerlink" title="二、问题推测"></a>二、问题推测</h5><h6 id="一-本地图片没有有效上传至github仓库中，导致引用无效"><a href="#一-本地图片没有有效上传至github仓库中，导致引用无效" class="headerlink" title="(一)本地图片没有有效上传至github仓库中，导致引用无效"></a>(一)本地图片没有有效上传至github仓库中，导致引用无效</h6><pre><code>解决方案：安装插件（回看前文）</code></pre><h6 id="（二）本地图片没有存放在同名文件夹中"><a href="#（二）本地图片没有存放在同名文件夹中" class="headerlink" title="（二）本地图片没有存放在同名文件夹中"></a>（二）本地图片没有存放在同名文件夹中</h6><pre><code>解决方案：将需要引用的本地图片存放在与文章名相同的文件夹中</code></pre><h6 id="（三）图片路径出错"><a href="#（三）图片路径出错" class="headerlink" title="（三）图片路径出错"></a>（三）图片路径出错</h6><p>解决方案：打开_config.yml修改下述内容<br><img style="margin-left:30px;" src="https://img-blog.csdnimg.cn/20181115112941162.png"></p>
+<h6 id="（四）相对路径引用的标签插件"><a href="#（四）相对路径引用的标签插件" class="headerlink" title="（四）相对路径引用的标签插件"></a>（四）相对路径引用的标签插件</h6><figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">通过常规的 markdown 语法和相对路径来引用图片和其它资源可能会导致它们在存档页或者主页</span><br><span class="line">上显示不正确。在Hexo <span class="number">2</span>时代，社区创建了很多插件来解决这个问题。但是，随着Hexo <span class="number">3</span> 的  </span><br><span class="line">发布，许多新的标签插件被加入到了核心代码中。这使得你可以更简单地在文章中引用你的资源。</span><br></pre></td></tr></table></figure>
+
+<p><small><strong>也就是说在存档页和主页不能使用和文章内容中的常规语法来引用图片。</strong></small></p>
+<!-- 注释 -->
+
+
+
+<blockquote><p>比如说：当你打开文章资源文件夹功能后，你把一个 <code>example.jpg</code> 图片放在了你的资源文件夹中，如果通过使用相对路径的常规 markdown 语法 <code>![](/example.jpg)</code>，它将 不会 出现在首页上。（但是它会在文章中按你期待的方式工作）</p>
+</blockquote>
+
+
+<p>正确的引用图片方式是使用下列的标签插件而不是 markdown ：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&#123;% asset_img example.jpg This is an example image %&#125;</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>hexo建站</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Markdown 编辑器日常使用语法记录</title>
+    <url>/post/9c39465b.html</url>
+    <content><![CDATA[<h4 id="段首缩进"><a href="#段首缩进" class="headerlink" title="段首缩进"></a>段首缩进</h4><figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="symbol">&amp;emsp;</span><span class="symbol">&amp;emsp;</span></span><br></pre></td></tr></table></figure>
+<p>下面用菜根谭中一段做例<br>&emsp;&emsp;好丑心太明，则物不契；贤愚心太明，则人不亲。士君子须是内精明而外浑厚，使好丑两得其平，贤愚共受其益，才是生成的德量。</p>
+<a id="more"></a>
+
+<h4 id="文本局中"><a href="#文本局中" class="headerlink" title="文本局中"></a>文本局中</h4><blockquote class="blockquote-center"><p>夜宿山寺<br>唐 · 李白<br>危楼高百尺，手可摘星辰。<br>不敢高声语，恐惊天上人。</p>
+</blockquote>
+
+<h4 id="插入图片"><a href="#插入图片" class="headerlink" title="插入图片"></a>插入图片</h4><figure class="highlight less"><table><tr><td class="code"><pre><span class="line">!<span class="selector-attr">[]</span>(images/<span class="number">1</span>.jpg)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/post/9c39465b/child01.jpg" alt="小女孩"></p>
+<h4 id="分页显示"><a href="#分页显示" class="headerlink" title="分页显示"></a>分页显示</h4><figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">escape</span>&gt;</span><span class="comment">&lt;!-- more --&gt;</span><span class="tag">&lt;/<span class="name">escape</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h4 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h4><ol>
+  <li>文字链接</li>
+
+  <figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">[<span class="string">github</span>](<span class="link">www.github.com</span>)</span><br></pre></td></tr></table></figure>
+  <li>网址链接</li>
+
+  <figure class="highlight css"><table><tr><td class="code"><pre><span class="line">&lt;<span class="selector-tag">www</span><span class="selector-class">.Google</span><span class="selector-class">.hk</span>&gt;</span><br></pre></td></tr></table></figure>
+</ol>
+
+
+
+
+<h4 id="表格"><a href="#表格" class="headerlink" title="表格"></a>表格</h4><figure class="highlight gherkin"><table><tr><td class="code"><pre><span class="line">|<span class="string"> 姓名 </span>|<span class="string"> 性别 </span>|<span class="string"> 电话 </span>|</span><br><span class="line">|<span class="string"> :--- </span>|<span class="string"> :----: </span>|<span class="string"> ----: </span>|</span><br><span class="line">|<span class="string"> 张三 </span>|<span class="string"> 男 </span>|<span class="string"> 123456789123 </span>|</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">姓名</th>
+<th align="center">性别</th>
+<th align="right">电话</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">张三</td>
+<td align="center">男</td>
+<td align="right">123456789123</td>
+</tr>
+</tbody></table>
+<h4 id="图片墙"><a href="#图片墙" class="headerlink" title="图片墙"></a>图片墙</h4><figure class="highlight mel"><table><tr><td class="code"><pre><span class="line">&#123;% grouppicture [<span class="keyword">group</span>]-[<span class="keyword">layout</span>] %&#125;&#123;% endgrouppicture %&#125;</span><br><span class="line">&#123;% gp [<span class="keyword">group</span>]-[<span class="keyword">layout</span>] %&#125;&#123;% endgp %&#125;</span><br><span class="line"></span><br><span class="line">[<span class="keyword">group</span>]  : 要在组中添加的图片总数。</span><br><span class="line">[<span class="keyword">layout</span>] : 要显示的组下的默认图片。</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight crystal"><table><tr><td class="code"><pre><span class="line"><span class="template-variable">&#123;% gp <span class="number">4</span>-<span class="number">4</span> %&#125;</span></span><br><span class="line">  ![](<span class="regexp">/photos/images</span><span class="regexp">/1.jpg)</span></span><br><span class="line"><span class="regexp">  ![](/photos</span><span class="regexp">/images/</span><span class="number">2</span>.jpg)</span><br><span class="line">  ![](<span class="regexp">/photos/images</span><span class="regexp">/3.jpg)</span></span><br><span class="line"><span class="regexp">  ![](/photos</span><span class="regexp">/images/</span><span class="number">4</span>.jpg)</span><br><span class="line"><span class="template-variable">&#123;% endgp %&#125;</span></span><br></pre></td></tr></table></figure>
+
+<div class="group-picture"><div class="group-picture-container"><div class="group-picture-row"><div class="group-picture-column" style="width: 33.333333333333336%;"><img src="/photos/images/1.jpg" alt></div><div class="group-picture-column" style="width: 33.333333333333336%;"><img src="/photos/images/2.jpg" alt></div><div class="group-picture-column" style="width: 33.333333333333336%;"><img src="/photos/images/3.jpg" alt></div></div><div class="group-picture-row"><div class="group-picture-column" style="width: 100%;"><img src="/photos/images/10.jpg" alt></div></div></div></div>
+
+
+<h4 id="按钮"><a href="#按钮" class="headerlink" title="按钮"></a>按钮</h4><figure class="highlight django"><table><tr><td class="code"><pre><span class="line"><span class="template-tag">&#123;% <span class="name">button</span> #, 开始 %&#125;</span></span><br></pre></td></tr></table></figure>
+
+<a class="btn" href="#">开始</a>
+
+<figure class="highlight django"><table><tr><td class="code"><pre><span class="line"><span class="template-tag">&#123;% <span class="name">btn</span> #, Text %&#125;</span><span class="xml"> </span><span class="template-tag">&#123;% <span class="name">btn</span> #, 取消,, Title %&#125;</span></span><br></pre></td></tr></table></figure>
+
+<a class="btn" href="#">Text</a> <a class="btn" href="#" title="Title">取消</a>
+
+
+<figure class="highlight django"><table><tr><td class="code"><pre><span class="line"><span class="template-tag">&#123;% <span class="name">button</span> url, text, icon [class], [title] %&#125;</span></span><br><span class="line"><span class="xml"><span class="comment">&lt;!-- 标签别名 --&gt;</span></span></span><br><span class="line"><span class="template-tag">&#123;% <span class="name">btn</span> url, text, icon [class], [title] %&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="xml">url     : 绝对或相对URL</span></span><br><span class="line"><span class="xml">text    : 按钮文字，如果未指定图标则为必须</span></span><br><span class="line"><span class="xml">icon    : FontAwesome图标名称（开头没有'fa-'）。如果未指定文本，则为必需</span></span><br><span class="line"><span class="xml">[class] : FontAwesome类：fa-fw | fa-lg | fa-2x | fa-3x | fa-4x | fa-5X ，可选参数。</span></span><br><span class="line"><span class="xml">[title] : 鼠标悬停时的工具提示，可选参数。</span></span><br></pre></td></tr></table></figure>
+
+<p>使用：</p>
+<p>最好添加<code>&lt;div&gt;标签</code>，测试时没加div，下面显示不完全，加上非常美观。</p>
+<figure class="highlight django"><table><tr><td class="code"><pre><span class="line"><span class="xml"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span><span class="template-tag">&#123;% <span class="name">btn</span> https://www.zhyong.cn ,首页,home fa-2x,这是YouForever的首页%&#125;</span><span class="xml"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br></pre></td></tr></table></figure>
+<p>显示：</p>
+<div><a class="btn" href="https://blog.xiaosige.com/" title="这是leeze的首页"><i class="fa fa-home fa-fw"></i>首页</a></div>
+
+
+<h4 id="标签"><a href="#标签" class="headerlink" title="标签"></a>标签</h4><figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">&#123;% label [class]@Text %&#125;</span><br><span class="line"></span><br><span class="line">[class] :<span class="built_in"> default </span>| primary | success | <span class="builtin-name">info</span> | <span class="builtin-name">warning</span> | danger.</span><br><span class="line">          <span class="string">'@Text'</span> 可以指定是否有空格</span><br><span class="line">          例如。 <span class="string">'success @text'</span>类似于<span class="string">'success @ text'</span>。</span><br><span class="line">          如果未指定，则将选择默认类。</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight django"><table><tr><td class="code"><pre><span class="line"><span class="xml">Lorem </span><span class="template-tag">&#123;% <span class="name">label</span> @ipsum %&#125;</span><span class="xml"> </span><span class="template-tag">&#123;% <span class="name">label</span> primary@dolor sit %&#125;</span><span class="xml"> amet, consectetur </span><span class="template-tag">&#123;% <span class="name">label</span> success@adipiscing elit, %&#125;</span><span class="xml"> sed </span><span class="template-tag">&#123;% <span class="name">label</span> info@do eiusmod %&#125;</span><span class="xml"> tempor incididunt ut labore et dolore magna aliqua.</span></span><br><span class="line"></span><br><span class="line"><span class="xml">Ut enim *</span><span class="template-tag">&#123;% <span class="name">label</span> warning @ad %&#125;</span><span class="xml">* minim veniam, quis **</span><span class="template-tag">&#123;% <span class="name">label</span> danger@nostrud %&#125;</span><span class="xml">** exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</span></span><br><span class="line"></span><br><span class="line"><span class="xml">Duis aute irure dolor in reprehenderit in voluptate ~~</span><span class="template-tag">&#123;% <span class="name">label</span> default @velit %&#125;</span><span class="xml">~~ <span class="tag">&lt;<span class="name">mark</span>&gt;</span>esse<span class="tag">&lt;/<span class="name">mark</span>&gt;</span> cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</span></span><br></pre></td></tr></table></figure>
+
+<p>Lorem <span class="label default">ipsum</span> <span class="label primary">dolor sit</span> amet, consectetur <span class="label success">adipiscing elit,</span> sed <span class="label info">do eiusmod</span> tempor incididunt ut labore et dolore magna aliqua.</p>
+<p>Ut enim *<span class="label warning">ad</span>* minim veniam, quis <strong><span class="label danger">nostrud</span></strong> exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+<p>Duis aute irure dolor in reprehenderit in voluptate <del><span class="label default">velit</span></del> <mark>esse</mark> cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+<h4 id="标注"><a href="#标注" class="headerlink" title="标注"></a>标注</h4><figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">&#123;%<span class="built_in"> note </span>[class] [no-icon] %&#125;</span><br><span class="line">任何内容（支持内联标签）</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">[class]   :<span class="built_in"> default </span>| primary | success | <span class="builtin-name">info</span> | <span class="builtin-name">warning</span> | danger.</span><br><span class="line">[no-icon] : 禁用备注中的图标</span><br><span class="line"></span><br><span class="line">所有参数都是可选的。</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">&#123;% note %&#125;</span><br><span class="line">无任何样式</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note success %&#125;</span><br><span class="line">成功的笔记</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note primary %&#125;</span><br><span class="line"><span class="section">#### Primary Header</span></span><br><span class="line"><span class="strong">**Welcome**</span> to [<span class="string">Hexo!</span>](<span class="link">https://hexo.io</span>)</span><br><span class="line">&#123;% endnote %&#125;</span><br></pre></td></tr></table></figure>
+
+<div class="note primary">
+            <h5 id="Primary-Header"><a href="#Primary-Header" class="headerlink" title="Primary Header"></a>Primary Header</h5><p><strong>Welcome</strong> to <a href="https://hexo.io" target="_blank" rel="noopener">Hexo!</a></p>
+          </div>
+
+<h4 id="pdf-文件"><a href="#pdf-文件" class="headerlink" title="pdf 文件"></a>pdf 文件</h4><p>1,第一方法</p>
+<figure class="highlight perl"><table><tr><td class="code"><pre><span class="line">&lt;iframe src=<span class="string">"http://lc-0ww4yxjs.cn-n1.lcfile.com/510df791fa9b2590c109/Python%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B%EF%BC%88%E7%AC%AC3%E7%89%88%EF%BC%89.pdf"</span> width=<span class="string">"830"</span> height=<span class="string">"800"</span> scroll=<span class="string">"no"</span>&gt;&lt;<span class="regexp">/iframe&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>2,第二方法</p>
+<figure class="highlight perl"><table><tr><td class="code"><pre><span class="line">&lt;embed src=<span class="string">"http://lc-0ww4yxjs.cn-n1.lcfile.com/510df791fa9b2590c109/Python%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B%EF%BC%88%E7%AC%AC3%E7%89%88%EF%BC%89.pdf"</span> width=<span class="string">"840"</span> height=<span class="string">"800"</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p>这两种方法效果是一样的，但是不够完美，pdf 文件不能随窗口大小变化，后读发现方法在更新。</p>
+<p>启用PDF标签插件：<a href="https://github.com/theme-next/theme-next-pdf" target="_blank" rel="noopener">https://github.com/theme-next/theme-next-pdf</a></p>
+<p>官方教程<br><a href="https://theme-next.org/docs/tag-plugins/pdf" target="_blank" rel="noopener">https://theme-next.org/docs/tag-plugins/pdf</a></p>
+<p>使用：</p>
+<figure class="highlight prolog"><table><tr><td class="code"><pre><span class="line">&#123;<span class="comment">% pdf url [height] %&#125;</span></span><br><span class="line"></span><br><span class="line">[url]    : 相对路径</span><br><span class="line">[height] : 可选参数，pdf展示的高度, e.g. <span class="number">800</span>px.</span><br></pre></td></tr></table></figure>
+<p>示例1：</p>
+<figure class="highlight vim"><table><tr><td class="code"><pre><span class="line">&#123;% pdf http<span class="variable">s:</span>//zhyong-<span class="keyword">cn</span>-<span class="keyword">file</span>.oss-<span class="keyword">cn</span>-shanghai.aliyuncs.<span class="keyword">com</span>/books%<span class="number">2</span>Fbyte-of-<span class="keyword">python</span>-chinese-edition.pdf %&#125;</span><br></pre></td></tr></table></figure>
+
+<div class="pdf" target="https://zhyong-cn-file.oss-cn-shanghai.aliyuncs.com/books%2Fbyte-of-python-chinese-edition.pdf" height></div>
+
+<p>示例2：</p>
+<figure class="highlight llvm"><table><tr><td class="code"><pre><span class="line">&#123;% pdf http://lc<span class="number">-0</span>ww<span class="number">4</span>yxjs.cn-n<span class="number">1</span>.lcfile.com/<span class="number">510</span>df<span class="number">791</span>fa<span class="number">9</span>b<span class="number">2590</span><span class="keyword">c</span><span class="number">109</span>/Python<span class="symbol">%E5</span><span class="symbol">%9</span>F<span class="symbol">%BA</span><span class="symbol">%E7</span><span class="symbol">%A1</span><span class="symbol">%80</span><span class="symbol">%E6</span><span class="symbol">%95</span><span class="symbol">%99</span><span class="symbol">%E7</span><span class="symbol">%A8</span><span class="symbol">%8</span>B<span class="symbol">%EF</span><span class="symbol">%BC</span><span class="symbol">%88</span><span class="symbol">%E7</span><span class="symbol">%AC</span><span class="symbol">%AC3</span><span class="symbol">%E7</span><span class="symbol">%89</span><span class="symbol">%88</span><span class="symbol">%EF</span><span class="symbol">%BC</span><span class="symbol">%89</span>.pdf %&#125;</span><br></pre></td></tr></table></figure>
+
+<div class="pdf" target="http://lc-0ww4yxjs.cn-n1.lcfile.com/510df791fa9b2590c109/Python%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B%EF%BC%88%E7%AC%AC3%E7%89%88%EF%BC%89.pdf" height></div>
+
+<h4 id="锚点"><a href="#锚点" class="headerlink" title="锚点"></a>锚点</h4><p>用于页内跳转。其中定义id地方，虽然不太美观，不过只能写HTML。<br>语法</p>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">[<span class="string">点击我跳转到锚点</span>](<span class="link">#jump</span>)</span><br><span class="line"><span class="xml"><span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span> = <span class="string">"jump"</span>&gt;</span></span>我是一个锚点，跳到我这里来<span class="xml"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<h4 id="标题"><a href="#标题" class="headerlink" title="标题"></a>标题</h4><p>使用 # 号可标记1 - 6级标题，一级标题对应 1 个 # 号，二级标题对应 2 个 # 号，以此类推。</p>
+<figure class="highlight clean"><table><tr><td class="code"><pre><span class="line"># 一级标题</span><br><span class="line">## 二级标题</span><br><span class="line">### 三级标题</span><br><span class="line">#### 四级标题</span><br><span class="line">##### 五级标题</span><br><span class="line">###### 六级标题</span><br></pre></td></tr></table></figure>
+
+<h4 id="字体"><a href="#字体" class="headerlink" title="字体"></a>字体</h4><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="emphasis">*斜体文本*</span></span><br><span class="line"><span class="emphasis">_斜体文本_</span></span><br><span class="line"><span class="strong">**粗体文本**</span></span><br><span class="line"><span class="strong">__粗体文本__</span></span><br><span class="line"><span class="strong">***粗斜体文本**</span>*</span><br><span class="line"><span class="strong">___粗斜体文本__</span>_</span><br></pre></td></tr></table></figure>
+
+<p>显示效果如下：</p>
+<p><em>斜体文本</em></p>
+<p><em>斜体文本</em></p>
+<p><strong>粗体文本</strong> </p>
+<p><strong>粗体文本</strong></p>
+<p><strong><em>粗斜体文本</em></strong></p>
+<p><strong><em>粗斜体文本</em></strong></p>
+<h4 id="字号及颜色"><a href="#字号及颜色" class="headerlink" title="字号及颜色"></a>字号及颜色</h4><figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">font</span> <span class="attr">size</span>=<span class="string">1</span>&gt;</span>大小为1的字体<span class="tag">&lt;/<span class="name">font</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">font</span> <span class="attr">size</span>=<span class="string">6</span>&gt;</span>大小为6的字体<span class="tag">&lt;/<span class="name">font</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">font</span> <span class="attr">color</span>=<span class="string">gray</span> <span class="attr">size</span>=<span class="string">4</span>&gt;</span>gray颜色的字<span class="tag">&lt;/<span class="name">font</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">font</span> <span class="attr">color</span>=<span class="string">green</span> <span class="attr">size</span>=<span class="string">4</span>&gt;</span>green颜色的字<span class="tag">&lt;/<span class="name">font</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">font</span> <span class="attr">color</span>=<span class="string">hotpink</span> <span class="attr">size</span>=<span class="string">4</span>&gt;</span>hotpink颜色的字<span class="tag">&lt;/<span class="name">font</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">font</span> <span class="attr">color</span>=<span class="string">LightCoral</span> <span class="attr">size</span>=<span class="string">4</span>&gt;</span>LightCoral颜色的字<span class="tag">&lt;/<span class="name">font</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">font</span> <span class="attr">color</span>=<span class="string">LightSlateGray</span> <span class="attr">size</span>=<span class="string">4</span>&gt;</span>LightSlateGray颜色的字<span class="tag">&lt;/<span class="name">font</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">font</span> <span class="attr">color</span>=<span class="string">orangered</span> <span class="attr">size</span>=<span class="string">4</span>&gt;</span>orangered颜色的字<span class="tag">&lt;/<span class="name">font</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">font</span> <span class="attr">color</span>=<span class="string">red</span> <span class="attr">size</span>=<span class="string">4</span>&gt;</span>red颜色的字<span class="tag">&lt;/<span class="name">font</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">font</span> <span class="attr">color</span>=<span class="string">springgreen</span> <span class="attr">size</span>=<span class="string">4</span>&gt;</span>springgreen颜色的字<span class="tag">&lt;/<span class="name">font</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">font</span> <span class="attr">color</span>=<span class="string">Turquoise</span> <span class="attr">size</span>=<span class="string">4</span>&gt;</span>Turquoise颜色的字<span class="tag">&lt;/<span class="name">font</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+<p><font size="1">大小为1的字体</font><br><br><font size="6">大小为6的字体</font><br><br><font color="gray" size="4">gray颜色的字</font><br><br><font color="green" size="4">green颜色的字</font><br><br><font color="hotpink" size="4">hotpink颜色的字</font><br><br><font color="LightCoral" size="4">LightCoral颜色的字</font><br><br><font color="LightSlateGray" size="4">LightSlateGray颜色的字</font><br><br><font color="orangered" size="4">orangered颜色的字</font><br><br><font color="red" size="4">red颜色的字</font><br><br><font color="springgreen" size="4">springgreen颜色的字</font><br><br><font color="Turquoise" size="4">Turquoise颜色的字</font></p>
+<h4 id="分隔线"><a href="#分隔线" class="headerlink" title="分隔线"></a>分隔线</h4><p>有多种方法都可以建立分隔线：3个以上的星号，3个以上的减号，3个以上的下划线，也可以在星号、减号、下划线中间插入空格，这几种方式都可以建立分隔线。</p>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="emphasis">***</span></span><br><span class="line"><span class="bullet">* </span><span class="emphasis">* *</span></span><br><span class="line"><span class="strong">*****</span>*</span><br><span class="line"><span class="bullet">- </span>- -</span><br><span class="line"><span class="emphasis">_ _</span> _</span><br></pre></td></tr></table></figure>
+<p>显示效果如下：</p>
+<hr>
+<hr>
+<hr>
+<hr>
+<hr>
+<h4 id="删除线"><a href="#删除线" class="headerlink" title="删除线"></a>删除线</h4><figure class="highlight haml"><table><tr><td class="code"><pre><span class="line">我没有删除线</span><br><span class="line">我也没有删除线</span><br><span class="line">~~我有删除线~~</span><br></pre></td></tr></table></figure>
+<p>显示效果如下：</p>
+<p>我没有删除线<br>我也没有删除线<br><del>我有删除线</del></p>
+<h4 id="下划线"><a href="#下划线" class="headerlink" title="下划线"></a>下划线</h4><p>Markdown中并无下划线的原生语法，可以通过HTML的<u>标签来实现。</u></p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">u</span>&gt;</span>我带下划线<span class="tag">&lt;/<span class="name">u</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>显示效果如下：</p>
+<p><u>我带下划线</u></p>
+<h4 id="无序列表"><a href="#无序列表" class="headerlink" title="无序列表"></a>无序列表</h4><p>无序列表使用星号，加号或是减号作为标记。</p>
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">* 列表项<span class="number">1</span></span><br><span class="line">* 列表项<span class="number">2</span></span><br><span class="line"></span><br><span class="line">+ 列表项<span class="number">1</span></span><br><span class="line">+ 列表项<span class="number">2</span></span><br><span class="line"></span><br><span class="line">- 列表项<span class="number">1</span></span><br><span class="line">- 列表项<span class="number">2</span></span><br></pre></td></tr></table></figure>
+<p>显示效果如下：</p>
+<ul>
+<li>列表项1</li>
+<li>列表项2</li>
+</ul>
+<ul>
+<li>列表项1</li>
+<li>列表项2</li>
+</ul>
+<ul>
+<li>列表项1</li>
+<li>列表项2</li>
+</ul>
+<h4 id="有序列表"><a href="#有序列表" class="headerlink" title="有序列表"></a>有序列表</h4><p>有序列表使用数字加上 . 号来表示，注意 . 号和实际内容之间需要加一个空格。</p>
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="number">1.</span> 有序列表项<span class="number">1</span></span><br><span class="line"><span class="number">2.</span> 有序列表项<span class="number">2</span></span><br></pre></td></tr></table></figure>
+<p>显示效果如下：</p>
+<ol>
+<li>有序列表项1</li>
+<li>有序列表项2</li>
+</ol>
+<h4 id="列表嵌套"><a href="#列表嵌套" class="headerlink" title="列表嵌套"></a>列表嵌套</h4><p>列表嵌套只需要在子列表选项的前面添加 4 个空格即可。</p>
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">* 无序列表<span class="number">1</span></span><br><span class="line">    <span class="number">1.</span> 有序列表<span class="number">1.1</span></span><br><span class="line">    <span class="number">2.</span> 有序列表<span class="number">1.2</span></span><br><span class="line">* 无序列表<span class="number">2</span></span><br><span class="line">    - 无序列表<span class="number">2.1</span></span><br><span class="line">    - 无序列表<span class="number">2.2</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>无序列表1<ol>
+<li>有序列表1.1</li>
+<li>有序列表1.2</li>
+</ol>
+</li>
+<li>无序列表2<ul>
+<li>无序列表2.1</li>
+<li>无序列表2.2</li>
+</ul>
+</li>
+</ul>
+<h4 id="Markdown区块"><a href="#Markdown区块" class="headerlink" title="Markdown区块"></a>Markdown区块</h4><p>区块使用 &gt; 符号，后面加上一个空格。</p>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="quote">&gt; 区块</span></span><br><span class="line"><span class="quote">&gt; Markdown</span></span><br><span class="line"><span class="quote">&gt; 用Markdown写文章，爽！</span></span><br></pre></td></tr></table></figure>
+
+<p>显示效果如下：</p>
+<blockquote>
+<p> 区块 Markdown 用Markdown写文章，爽！</p>
+</blockquote>
+<p>区块嵌套：每一层嵌套加上 &gt; 符号和空格</p>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="quote">&gt; 区块</span></span><br><span class="line"><span class="quote">&gt; &gt; 嵌套1</span></span><br><span class="line"><span class="quote">&gt; &gt; &gt; 嵌套2</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>区块</p>
+<blockquote>
+<p>嵌套1</p>
+<blockquote>
+<p>嵌套2</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<h4 id="其他标记"><a href="#其他标记" class="headerlink" title="其他标记"></a>其他标记</h4><p> <del>这是一条删除线</del></p>
+<p> <em>这里不会显示斜体</em></p>
+<p> <code>code</code></p>
+<p> <code>more code</code></p>
+]]></content>
+      <categories>
+        <category>Markdown</category>
+      </categories>
+      <tags>
+        <tag>Markdown</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>hexo之搭建个人博客</title>
+    <url>/post/dfea82e5.html</url>
+    <content><![CDATA[<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>  &emsp;&emsp;Hexo 是一个快速、简洁且高效的博客框架。Hexo 使用 Markdown（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页。hexo 博客在 Linux 系统中搭建是非常简单的，在 WIN 系统中比较复杂，我们接触的手机📱永远要比电脑的时间要多那么我们可以在安卓手机上使用 termux 来搭建，这样随时随地都可以写做和发表文章。</p>
+  <a id="more"></a> 
+
+<h2 id="前期工作"><a href="#前期工作" class="headerlink" title="前期工作"></a>前期工作</h2><pre><code>注册 github 账号
+添加 username.github.io 仓库
+本地搭建 git 环境
+配置 ssh
+本地连接 github
+
+
+安装 Node.js
+安装 git</code></pre><h2 id="开始安装"><a href="#开始安装" class="headerlink" title="开始安装"></a>开始安装</h2><h3 id="安装-Hexo"><a href="#安装-Hexo" class="headerlink" title="安装 Hexo"></a>安装 Hexo</h3><h4 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h4><figure class="highlight avrasm"><table><tr><td class="code"><pre><span class="line">$ npm install -g hexo-<span class="keyword">cli</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h4><p>安装完成之后，新建一个文件夹(例如: blog)，执行以下命令进行初始化</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo init &lt;folder&gt;</span><br><span class="line">或</span><br><span class="line">$ <span class="built_in">cd</span> &lt;folder&gt;</span><br><span class="line">$ hexo init</span><br></pre></td></tr></table></figure>
+
+<h4 id="进入文件夹"><a href="#进入文件夹" class="headerlink" title="进入文件夹"></a>进入文件夹</h4><p>进入 blog 文件夹</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> blog</span><br></pre></td></tr></table></figure>
+
+<h4 id="安装核心组件"><a href="#安装核心组件" class="headerlink" title="安装核心组件"></a>安装核心组件</h4><p>安装 npm 核心组件支持</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line">npm <span class="keyword">install</span></span><br></pre></td></tr></table></figure>
+
+<p>新建完成后，文件夹目录<br> <div class="note primary no-icon">
+            <p>_config.yml 文件是网站的配置文件，可以在其中配置网站的大部分参数。<br>package.json 文件是应用程序的信息。<br>source 是资源文件夹，是用来存放 xxxu 用户资源的地方。<br>themes 是主题文件夹，Hexo 会根据主题来生成不同的静态页面。<br>scaffolds 是模板件夹，当新建文章的时候，Hexo 会根据模板来建立文件。</p>
+          </div></p>
+<h3 id="安装-NexT-主题"><a href="#安装-NexT-主题" class="headerlink" title="安装 NexT 主题"></a>安装 NexT 主题</h3><h4 id="下载主题"><a href="#下载主题" class="headerlink" title="下载主题"></a>下载主题</h4><p>下载主题，<a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 的主题非常丰富可以去<a href="https://hexo.io/themes/" target="_blank" rel="noopener">官方主题</a>下载；下面有演示我使用的主题 <a href="https://github.com/theme-next/hexo-theme-next" target="_blank" rel="noopener">next</a></p>
+<figure class="highlight vim"><table><tr><td class="code"><pre><span class="line">git clone http<span class="variable">s:</span>//github.<span class="keyword">com</span>/theme-<span class="keyword">next</span>/hexo-theme-<span class="keyword">next</span> themes/<span class="keyword">next</span></span><br></pre></td></tr></table></figure>
+
+
+<h4 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h4><p>在站点配置文件_config.yml 开启 next 主题，修改<code>theme</code>属性，注意 <code>theme:</code>后要加<code>空格</code>，具体的站点和主题信息配置请自行去 <a href="https://hexo.io/zh-cn/" target="_blank" rel="noopener">hexo</a> 和 <a href="http://theme-next.iissnan.com/" target="_blank" rel="noopener">next 主题</a>文档查看</p>
+<figure class="highlight autoit"><table><tr><td class="code"><pre><span class="line">theme: <span class="keyword">next</span></span><br></pre></td></tr></table></figure>
+
+
+<h3 id="本地调试"><a href="#本地调试" class="headerlink" title="本地调试"></a>本地调试</h3><figure class="highlight elixir"><table><tr><td class="code"><pre><span class="line"><span class="variable">$ </span>hexo g <span class="comment">#生成静态页面，生成的内容在public文件夹下</span></span><br><span class="line"><span class="variable">$ </span>hexo s <span class="comment">#启动本地服务，进行文章预览调试。hexo s --debug 命令可以用来调试</span></span><br></pre></td></tr></table></figure>
+
+
+<h3 id="配置-ssh-密钥及-github-或者-gitee-部署"><a href="#配置-ssh-密钥及-github-或者-gitee-部署" class="headerlink" title="配置 ssh 密钥及 github 或者 gitee 部署"></a>配置 ssh 密钥及 github 或者 gitee 部署</h3><p> 配置 git</p>
+<figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">$ git<span class="built_in"> config </span>--global user.name <span class="string">"your name"</span></span><br><span class="line">$ git<span class="built_in"> config </span>--global user.email <span class="string">"email@email.com"</span></span><br><span class="line">省略。。。</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h3><p>1,安装 hexo-deployer-git 插件</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">$ npm <span class="keyword">install</span> hexo-deployer-git <span class="comment">--save</span></span><br></pre></td></tr></table></figure>
+
+
+<p>2,打开 Hexo 主文件夹下的_config.yml，设置其中的 deploy 参数</p>
+<figure class="highlight less"><table><tr><td class="code"><pre><span class="line"><span class="attribute">deploy</span>:</span><br><span class="line">    <span class="attribute">type</span>: git </span><br><span class="line">    <span class="attribute">repo</span>: git<span class="variable">@github</span>.<span class="attribute">com</span>:stiverick610/stiverick610.github.io.git</span><br><span class="line">    <span class="attribute">branch</span>: master</span><br></pre></td></tr></table></figure>
+
+<p>3,安装完成插件之后，使用以下命令部署</p>
+<figure class="highlight elixir"><table><tr><td class="code"><pre><span class="line"><span class="variable">$ </span>hexo d -g <span class="comment">#在部署前先生成</span></span><br></pre></td></tr></table></figure>
+
+
+<h3 id="Next-常用命令"><a href="#Next-常用命令" class="headerlink" title="Next 常用命令"></a>Next 常用命令</h3><p>常用命令</p>
+<figure class="highlight elixir"><table><tr><td class="code"><pre><span class="line"><span class="variable">$ </span>hexo clean <span class="comment">#清理之前生成的内容，即public文件</span></span><br><span class="line"><span class="variable">$ </span>hexo g <span class="comment">#生成静态文件</span></span><br><span class="line"><span class="variable">$ </span>hexo d <span class="comment">#部署</span></span><br><span class="line"><span class="variable">$ </span>hexo s <span class="comment">#启动本地服务，可以通过http://localhost:4000查看</span></span><br><span class="line"><span class="variable">$ </span>hexo s --debug <span class="comment">#使用debug模式启动服务</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="备份"><a href="#备份" class="headerlink" title="备份"></a>备份</h2><p>1-在 github 新建一个叫 blog 的仓库。</p>
+<p>2-在本地博客文件夹创建 git 版本库，如果没有安装 git 必须先安装 git。</p>
+<p>3-进入需要备份 blog 目录。</p>
+<p>4-创建版本库。</p>
+<figure class="highlight ebnf"><table><tr><td class="code"><pre><span class="line"><span class="attribute">git init</span></span><br></pre></td></tr></table></figure>
+<p>这个时候 blog 的版本库已经创建好了。<br>验证是否成功，如果有一个.git 的隐藏文件就说明创建成功。<br>查看隐藏文件</p>
+<figure class="highlight ebnf"><table><tr><td class="code"><pre><span class="line"><span class="attribute">ls -a</span></span><br></pre></td></tr></table></figure>
+<p>5-连接上面 github 创建的仓库</p>
+<figure class="highlight armasm"><table><tr><td class="code"><pre><span class="line"><span class="symbol">git</span> remote <span class="keyword">add </span>origin git<span class="comment">@github.com:you name/blog.git</span></span><br></pre></td></tr></table></figure>
+
+<p>6-添加备份文件 source/themes/ _config.yml scaffolds/package.json .gitignore 这些文件需要备份</p>
+<figure class="highlight dockerfile"><table><tr><td class="code"><pre><span class="line">git <span class="keyword">add</span><span class="bash"> <span class="built_in">source</span>/ themes/ _config.yml scaffolds/ package.json .gitignore</span></span><br></pre></td></tr></table></figure>
+
+<p>7-注释备份内容，明确的注释可以回退版本</p>
+<figure class="highlight nginx"><table><tr><td class="code"><pre><span class="line"><span class="attribute">git</span> commit -m <span class="string">"博客备份"</span></span><br></pre></td></tr></table></figure>
+
+<p>8-第一次强制上传文件到 github 仓库</p>
+<figure class="highlight maxima"><table><tr><td class="code"><pre><span class="line">git <span class="built_in">push</span> -u <span class="built_in">origin</span> master</span><br></pre></td></tr></table></figure>
+
+<p>这样博客就备份成功了，之后备份直接前面 6 、7 步，第 8 部直接使用下面命令就可以了</p>
+<figure class="highlight maxima"><table><tr><td class="code"><pre><span class="line">git <span class="built_in">push</span> <span class="built_in">origin</span> master</span><br></pre></td></tr></table></figure>
+
+<h2 id="恢复"><a href="#恢复" class="headerlink" title="恢复"></a>恢复</h2><p>git clone 自己备份的博客源代码克隆备份的 bolg 源文件地址是你自己的地址这里不做演示</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">git clone <span class="tag">&lt;<span class="name">版本库的网址</span>&gt;</span> <span class="tag">&lt;<span class="name">本地目录名</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="attr">cd</span> <span class="string">bolg</span></span><br><span class="line"><span class="attr">hexo</span> <span class="string">init</span></span><br><span class="line"><span class="attr">...</span></span><br><span class="line"><span class="attr">npm</span> <span class="string">install</span></span><br></pre></td></tr></table></figure>
+<p>安装相应插件</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">npm <span class="keyword">install</span> hexo-deployer-git <span class="comment">--save</span></span><br><span class="line">npm <span class="keyword">install</span> hexo-generator-searchdb <span class="comment">--save</span></span><br><span class="line">npm <span class="keyword">install</span> valine <span class="comment">--save</span></span><br><span class="line">npm <span class="keyword">install</span> hexo-symbols-<span class="keyword">count</span>-<span class="built_in">time</span> <span class="comment">--save</span></span><br><span class="line">npm <span class="keyword">install</span> <span class="comment">--save hexo-tag-aplayer</span></span><br><span class="line">npm <span class="keyword">install</span> hexo-tag-dplayer <span class="comment">--save</span></span><br></pre></td></tr></table></figure>
+
+<p><strong><code>一些东西摘自网上，未亲自验证。</code></strong></p>
+<br>
+
+<blockquote>
+<p>其他博客<br><a href="https://www.simon96.online/" target="_blank" rel="noopener">遇见西门</a><br><a href="https://zhousiwei.gitee.io/" target="_blank" rel="noopener">試毅-思伟</a><br><a href="https://blog.dlzhang.com/" target="_blank" rel="noopener">班班碎碎念</a><br><a href="https://me.idealli.com/" target="_blank" rel="noopener">小红鸡</a></p>
+</blockquote>
+<hr>
+
+<blockquote>
+<p>其他相关链接</p>
+<ul>
+<li><a href="https://www.simon96.online/2018/10/12/hexo-tutorial/" target="_blank" rel="noopener">【持续更新】最全Hexo博客搭建+主题优化+插件配置+常用操作+错误分析</a></li>
+<li><a href="https://github.com/coneycode/hexo-git-backup" target="_blank" rel="noopener">hexo-git-backup</a></li>
+<li><a href="https://www.hojun.cn/2018/01/25/Hexo%E5%8D%9A%E5%AE%A2%E5%A4%87%E4%BB%BD%E2%80%94%E5%A6%88%E5%A6%88%E5%86%8D%E4%B9%9F%E4%B8%8D%E7%94%A8%E6%8B%85%E5%BF%83%E4%BD%A0%E4%BD%BF%E7%94%A8hexo%E5%86%99%E5%8D%9A%E5%AE%A2/" target="_blank" rel="noopener">Hexo博客备份</a></li>
+</ul>
+</blockquote>
+]]></content>
+      <categories>
+        <category>hexo建站</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hello World</title>
+    <url>/post/4a17b156.html</url>
+    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
+<a id="more"></a>
+
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+]]></content>
+      <categories>
+        <category>测试</category>
+      </categories>
+      <tags>
+        <tag>Test</tag>
+      </tags>
+  </entry>
+</search>
