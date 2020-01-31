@@ -3,7 +3,10 @@
   <entry>
     <title>centos系统之部署ShowDoc</title>
     <url>/post/ef6fd2ef.html</url>
-    <content><![CDATA[<h4 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h4><p>&emsp;&emsp;showdoc是一个php语言编写的API文档系统，专为程序员设计，界面布局简单功能强大，支持在线和私服部署。</p>
+    <content><![CDATA[<h4 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h4><div class="note info no-icon">
+            <p>&emsp;&emsp;showdoc是一个php语言编写的API文档系统，专为程序员设计，界面布局简单功能强大，支持在线和私服部署。</p>
+          </div>
+
 <a id="more"></a>
 
 <h4 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h4><ol>
