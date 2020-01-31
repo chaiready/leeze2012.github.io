@@ -47,20 +47,17 @@
   };
 </script>
 
-  <meta name="description" content="动态生成行号思想：借助bootstrap-table 本身的index属性和options的对象， 巧妙的的通过formatter 实现">
-<meta property="og:type" content="article">
-<meta property="og:title" content="bootstrap-table 显示行号">
-<meta property="og:url" content="https://blog.xiaosige.com/post/644b0626.html">
+  <meta name="description" content="因上努力，果上随缘！">
+<meta property="og:type" content="website">
+<meta property="og:title" content="leeze">
+<meta property="og:url" content="https://blog.xiaosige.com/tags/showdoc/index.html">
 <meta property="og:site_name" content="leeze">
-<meta property="og:description" content="动态生成行号思想：借助bootstrap-table 本身的index属性和options的对象， 巧妙的的通过formatter 实现">
+<meta property="og:description" content="因上努力，果上随缘！">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2019-10-10T10:41:00.000Z">
-<meta property="article:modified_time" content="2020-01-21T05:45:13.577Z">
 <meta property="article:author" content="leeze">
-<meta property="article:tag" content="bootstrap">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://blog.xiaosige.com/post/644b0626.html">
+<link rel="canonical" href="https://blog.xiaosige.com/tags/showdoc/">
 
 
 <script id="page-configurations">
@@ -68,11 +65,11 @@
   CONFIG.page = {
     sidebar: "",
     isHome: false,
-    isPost: true
+    isPost: false
   };
 </script>
 
-  <title>bootstrap-table 显示行号 | leeze</title>
+  <title>标签: showdoc | leeze</title>
   
 
 
@@ -221,151 +218,54 @@
           <div class="content">
             
 
-  <div class="posts-expand">
-      
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://blog.xiaosige.com/post/644b0626.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/leeze_ava_2_1.png">
-      <meta itemprop="name" content="leeze">
-      <meta itemprop="description" content="因上努力，果上随缘！">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="leeze">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          bootstrap-table 显示行号
+  
+  <div class="post-block">
+    <div class="posts-collapse">
+      <div class="collection-title">
+        <h1 class="collection-header">showdoc
+          <small>标签</small>
         </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2019-10-10 18:41:00" itemprop="dateCreated datePublished" datetime="2019-10-10T18:41:00+08:00">2019-10-10</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-01-21 13:45:13" itemprop="dateModified" datetime="2020-01-21T13:45:13+08:00">2020-01-21</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/bootstrap/" itemprop="url" rel="index">
-                    <span itemprop="name">bootstrap</span>
-                  </a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/bootstrap/table/" itemprop="url" rel="index">
-                    <span itemprop="name">table</span>
-                  </a>
-                </span>
-            </span>
-
-          
-            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span id="busuanzi_value_page_pv"></span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
+      </div>
 
       
-        <h4 id="动态生成行号"><a href="#动态生成行号" class="headerlink" title="动态生成行号"></a>动态生成行号</h4><p>思想：借助bootstrap-table 本身的<code>index</code>属性和<code>options</code>的对象， 巧妙的的通过<code>formatter</code> 实现</p>
-<a id="more"></a>
-
-<figure class="highlight clojure"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;field: <span class="string">"Number"</span>,title: <span class="string">"序号"</span>,halign: 'center',align:'center',</span><br><span class="line">    formatter:function (<span class="name">value</span>, row, index) &#123;</span><br><span class="line">        var options = $table.bootstrapTable(<span class="string">"getOptions"</span>)<span class="comment">;</span></span><br><span class="line">        return (<span class="name">options.pageNumber-1</span>)*(<span class="name">options.pageSize</span>)+index+1;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    <div class="collection-year">
+      <h1 class="collection-header">2020</h1>
     </div>
 
-    
-    
-    
-<div>
-    
-       <div style="height: 1px;margin-top: 60px;text-align: center;border-top: 1px solid #e2e2e2;">
-       <span style="position: relative;top:-18px;background: #fff;display: inline-block;color: #ccc;font-size:14px;">本文结束---<i class="fa fa-paw"></i>---感谢您的阅读</span>
-     </div>
-     <div style="margin-top: 30px;">
-      <img id="wechat_subscriber_qcode" src="/images/leeze_ava_4.png" alt="leeze wechat" style="width: 200px; max-width: 100%;">
-     </div>
-    
-</div>
+  <article itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
 
+      <div class="post-meta">
+        <time itemprop="dateCreated"
+              datetime="2020-01-31T19:53:04+08:00"
+              content="2020-01-31">
+          01-31
+        </time>
+      </div>
 
-        
+      <h2 class="post-title">
+          <a class="post-title-link" href="/post/ef6fd2ef.html" itemprop="url">
+            <span itemprop="name">centos系统之部署ShowDoc</span>
+          </a>
+      </h2>
 
-<div>
-<ul class="post-copyright">
-  <li class="post-copyright-author">
-    <strong>本文作者： </strong>leeze
-  </li>
-  <li class="post-copyright-link">
-    <strong>本文链接：</strong>
-    <a href="https://blog.xiaosige.com/post/644b0626.html" title="bootstrap-table 显示行号">https://blog.xiaosige.com/post/644b0626.html</a>
-  </li>
-  <li class="post-copyright-license">
-    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
-  </li>
-</ul>
-</div>
-
-
-      <footer class="post-footer">
-          
-          <div class="post-tags">
-              <a href="/tags/bootstrap/" rel="tag"><i class="fa fa-tag"></i> bootstrap</a>
-          </div>
-
-        
-
-
-        
-    <div class="post-nav">
-      <div class="post-nav-item">
-    <a href="/post/5f2bf15a.html" rel="prev" title="jenkins之shell 部署脚本">
-      <i class="fa fa-chevron-left"></i> jenkins之shell 部署脚本
-    </a></div>
-      <div class="post-nav-item">
-    <a href="/post/2cf589fe.html" rel="next" title="Linux之hosts主机名不对">
-      Linux之hosts主机名不对 <i class="fa fa-chevron-right"></i>
-    </a></div>
-    </div>
-      </footer>
-    
+    </header>
   </article>
+
+    </div>
+  </div>
   
   
   
 
-  </div>
+  
+
 
 
           </div>
           
-    <div class="comments" id="gitalk-container"></div>
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -412,7 +312,6 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#动态生成行号"><span class="nav-number">1.</span> <span class="nav-text">动态生成行号</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -632,25 +531,6 @@ if (document.querySelectorAll('div.pdf').length) {
 
   
 
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
-
-<script>
-NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID: '0bf811e9556c918d4fc0',
-      clientSecret: 'c54f979cd4e37f92b77fdc11e465dec81b90b7a3',
-      repo: 'leeze2012.github.io',
-      owner: 'leeze2012',
-      admin: ['leeze2012'],
-      id: '34a43c5b487e816ce272ca266464442b',
-        language: 'zh-CN',
-      distractionFreeMode: true
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-});
-</script>
 
 </body>
 </html>

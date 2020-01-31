@@ -1,6 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>centos系统之部署ShowDoc</title>
+    <url>/post/ef6fd2ef.html</url>
+    <content><![CDATA[<h4 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h4><p>&emsp;&emsp;showdoc是一个php语言编写的API文档系统，专为程序员设计，界面布局简单功能强大，支持在线和私服部署。</p>
+<a id="more"></a>
+
+<h4 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h4><ol>
+<li>支持markdown语法</li>
+<li>支持多用户协作，你可以在项目下面随意添加多个用户一起完成api文档的写作。</li>
+<li>可以分享并导出项目，生成需要的文档格式如doc，可以离线浏览</li>
+<li>支持响应式，手机电脑同样精彩</li>
+<li>支持项目转让</li>
+<li>支持模版插入</li>
+<li>支持历史版本，你可以把操作恢复到以前的版本。</li>
+<li>showdoc完全开源</li>
+<li>可以部署到自己的服务器</li>
+<li>如果在线使用，可以设置自己的个性域名，也可以对文档进行加密，浏览者需要密码才能访问</li>
+<li>可以通过一个在线测试api的工具，直接生成markdown，你几乎不用写代码就能过所有的参数自动生成</li>
+</ol>
+<br>
+
+<p>下载地址：<a href="https://github.com/star7th/showdoc" target="_blank" rel="noopener">https://github.com/star7th/showdoc</a><br>官网地址：<a href="https://www.showdoc.cc" target="_blank" rel="noopener">https://www.showdoc.cc</a></p>
+<h4 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h4><p>showdoc需要运行在<code>php</code>环境上，因此需要安装好<code>nginx</code>和<code>php</code><br>nginx和php的安装步骤这里不再赘述，网上相关安装教程数不胜数</p>
+<p><code>注意php版本最好5.4以上</code></p>
+<h4 id="下载源码包"><a href="#下载源码包" class="headerlink" title="下载源码包"></a>下载源码包</h4><p><a href="https://github.com/star7th/showdoc" target="_blank" rel="noopener">https://github.com/star7th/showdoc</a></p>
+<p>将zip包传到部署好的nginx和php所在服务器<br>放到nginx默认的网站目录html下解压</p>
+<figure class="highlight crmsh"><table><tr><td class="code"><pre><span class="line">unzip showdoc-<span class="literal">master</span>.zip</span><br></pre></td></tr></table></figure>
+
+
+<p>请确保nginx和php对源码包下这5个目录可写权限：<br>/Application/Runtime 、 /Public/Uploads 、 /Sqlite 、 /Sqlite、showdoc.db.php</p>
+<figure class="highlight crmsh"><table><tr><td class="code"><pre><span class="line">chown -R nginx.nginx  /usr/local/nginx/html/showdoc-<span class="literal">master</span></span><br><span class="line"><span class="comment"># nginx.nignx表示属主和属组，主与组的名字取决于nginx和php的启动用户是谁</span></span><br><span class="line"><span class="comment"># 如果不太理解，也可以直接chmod 777 -R 对以上的几个目录分别授予写入权限</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="attr">cd</span> <span class="string">showdoc-master/</span></span><br><span class="line"></span><br><span class="line"><span class="attr">chmod</span> <span class="string">777 -R server/</span></span><br><span class="line"><span class="attr">chmod</span> <span class="string">777 -R Public/Uploads/</span></span><br><span class="line"><span class="attr">chmod</span> <span class="string">777 -R install/</span></span><br><span class="line"><span class="attr">chmod</span> <span class="string">777 -R Sqlite/</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="安装showdoc"><a href="#安装showdoc" class="headerlink" title="安装showdoc"></a>安装showdoc</h4><p>showdoc采用web安装方式，非常人性化<br>检查nginx和php是否启动成功，配置好nginx虚拟主机目录指向showdoc目录并关联php</p>
+<figure class="highlight nginx"><table><tr><td class="code"><pre><span class="line"><span class="comment">#配置nginx虚拟主机目录指向showdoc源码包目录</span></span><br><span class="line"><span class="section">server</span> &#123;</span><br><span class="line">    <span class="attribute">listen</span> <span class="number">80</span>;</span><br><span class="line">    <span class="attribute">server_name</span> <span class="regexp">showdoc.*</span>*<span class="regexp">*.com</span>;</span><br><span class="line">    <span class="attribute">root</span>  /usr/local/nginx/showdoc-master;</span><br><span class="line">    <span class="attribute">index</span> index.php index.html;</span><br><span class="line">   </span><br><span class="line"><span class="comment">#配置nginx关联php</span></span><br><span class="line">    <span class="attribute">location</span> <span class="regexp">~ \.php$</span> &#123;</span><br><span class="line">        <span class="attribute">fastcgi_pass</span> <span class="number">127.0.0.1:9000</span>;</span><br><span class="line">        <span class="attribute">fastcgi_index</span> index.php;</span><br><span class="line">        <span class="attribute">include</span> fastcgi_params;</span><br><span class="line">        <span class="attribute">fastcgi_param</span> SCRIPT_FILENAME  <span class="variable">$DOCUMENT_ROOT</span><span class="variable">$fastcgi_script_name</span>;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在浏览器访问 <a href="http://showdoc.***.com/install/" target="_blank" rel="noopener">http://showdoc.***.com/install/</a> 按步骤安装即可。</p>
+<p>。。。</p>
+<p>按网页中提示删除install目录(防止重装)：</p>
+<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">rm -rf  <span class="regexp">/usr/</span>local<span class="regexp">/nginx/</span>html<span class="regexp">/showdoc-master/i</span>nstall<span class="regexp">/</span></span><br></pre></td></tr></table></figure>
+
+<p>安装完毕后可使用 <a href="http://showdoc.***.com/index.php" target="_blank" rel="noopener">http://showdoc.***.com/index.php</a> 访问登录首页，默认账号showdoc（密码：123456）登录，也可以自行注册账户）</p>
+<p><code>至此showdoc部署完成，尽情探索吧</code></p>
+]]></content>
+      <categories>
+        <category>API文档系统</category>
+        <category>showdoc</category>
+      </categories>
+      <tags>
+        <tag>Linux</tag>
+        <tag>showdoc</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Maven 打包将 system 的文件添加到 war 中</title>
     <url>/post/63dee017.html</url>
     <content><![CDATA[<h4 id="文章背景"><a href="#文章背景" class="headerlink" title="文章背景"></a>文章背景</h4><div class="note info no-icon">
