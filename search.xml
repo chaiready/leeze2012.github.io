@@ -58,7 +58,7 @@
 <li>检查是否安装成功</li>
 </ul>
 <p>&emsp;&emsp;执行成功后会在<code>/etc/yum.repos.d/</code>目录下生成两个repo文件<code>mysql-community.repo</code>及 <code>mysql-community-source.repo</code></p>
-<p>并且通过yum repolist可以看到mysql相关资源</p>
+<p>&emsp;&emsp;并且通过yum repolist可以看到mysql相关资源</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">shell&gt; yum repolist enabled | grep <span class="string">"mysql.*-community.*"</span></span><br><span class="line">!mysql-connectors-community/x86_64 MySQL Connectors Community                108</span><br><span class="line">!mysql-tools-community/x86_64      MySQL Tools Community                      90</span><br><span class="line">!mysql80-community/x86_64          MySQL 8.0 Community Server                113</span><br></pre></td></tr></table></figure>
 
 <h4 id="3、选择MySQL版本"><a href="#3、选择MySQL版本" class="headerlink" title="3、选择MySQL版本"></a>3、选择MySQL版本</h4><blockquote>
@@ -75,10 +75,10 @@
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">shell&gt; sudo yum-config-manager --<span class="built_in">disable</span> mysql80-community</span><br><span class="line">shell&gt; sudo yum-config-manager --<span class="built_in">enable</span> mysql57-community</span><br></pre></td></tr></table></figure>
 
 <p>&emsp;&emsp;除了使用yum-config-manager之外，还可以直接编辑<code>/etc/yum.repos.d/mysql-community.repo</code>文件</p>
-<p>enabled=0禁用</p>
+<p>&emsp;&emsp;enabled=0禁用</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">[mysql80-community]</span><br><span class="line">name=MySQL 8.0 Community Server</span><br><span class="line">baseurl=http://repo.mysql.com/yum/mysql-8.0-community/el/7/<span class="variable">$basearch</span>/</span><br><span class="line">enabled=0</span><br><span class="line">gpgcheck=1</span><br><span class="line">gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-mysql</span><br></pre></td></tr></table></figure>
 
-<p>enabled=1启用</p>
+<p>&emsp;&emsp;enabled=1启用</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Enable to use MySQL 5.7</span></span><br><span class="line">[mysql57-community]</span><br><span class="line">name=MySQL 5.7 Community Server</span><br><span class="line">baseurl=http://repo.mysql.com/yum/mysql-5.7-community/el/7/<span class="variable">$basearch</span>/</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=1</span><br><span class="line">gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-mysql</span><br></pre></td></tr></table></figure>
 
 <ul>
@@ -90,8 +90,8 @@
 <h4 id="4、安装MySQL"><a href="#4、安装MySQL" class="headerlink" title="4、安装MySQL"></a>4、安装MySQL</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">shell&gt; sudo yum install mysql-community-server</span><br></pre></td></tr></table></figure>
 
 <p>&emsp;&emsp;该命令会安装MySQL服务器 (mysql-community-server) 及其所需的依赖、相关组件，包括mysql-community-client、mysql-community-common、mysql-community-libs等</p>
-<p>如果带宽不够，这个步骤时间会比较长，请耐心等待~</p>
-<p>或</p>
+<p>&emsp;&emsp;如果带宽不够，这个步骤时间会比较长，请耐心等待~</p>
+<p>&emsp;&emsp;或</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">yum install mysql-server</span><br></pre></td></tr></table></figure>
 
 <h4 id="5、查询是否安装成功"><a href="#5、查询是否安装成功" class="headerlink" title="5、查询是否安装成功"></a>5、查询是否安装成功</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mysqladmin -V</span><br></pre></td></tr></table></figure>
@@ -123,7 +123,7 @@
 </ul>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ALTER USER <span class="string">'root'</span>@<span class="string">'localhost'</span> IDENTIFIED BY <span class="string">'Cn@12345678'</span>;</span><br></pre></td></tr></table></figure>
 
-<p>&emsp;&emsp;<code>这里会遇到一个问题</code>，mysql默认的密码规则必须包含特殊字符、大写字母、小写字母、数字、一定长度<br>并且对密码要求严格，至少8位，包含大小写等，</p>
+<p>&emsp;&emsp;<code>这里会遇到一个问题</code>，mysql默认的密码规则必须包含特殊字符、大写字母、小写字母、数字、一定长度<br>&emsp;&emsp;并且对密码要求严格，至少8位，包含大小写等，</p>
 <p>&emsp;&emsp;密码策略的所有参数</p>
 <figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SHOW</span> <span class="keyword">VARIABLES</span> <span class="keyword">LIKE</span> <span class="string">'validate_password%'</span>;</span><br><span class="line"><span class="keyword">show</span> <span class="keyword">variables</span> <span class="keyword">like</span> <span class="string">'%validate_password.policy%'</span>;</span><br><span class="line"><span class="keyword">show</span> <span class="keyword">variables</span> <span class="keyword">like</span> <span class="string">'%validate_password.length%'</span>;</span><br></pre></td></tr></table></figure>
 
@@ -139,7 +139,7 @@
 <figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">user</span>,host,<span class="keyword">plugin</span> <span class="keyword">from</span> <span class="keyword">user</span>;</span><br></pre></td></tr></table></figure>
 
 <p>&emsp;&emsp;发现登录主机是localhost，当然不能登录，把root用户的localhost设置为%，这样任意主机都可以连接。</p>
-<p>修改连接权限(%表示所有ip，如果只指定某台电脑，则改成相应的ip)</p>
+<p>&emsp;&emsp;修改连接权限(%表示所有ip，如果只指定某台电脑，则改成相应的ip)</p>
 <figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">update<span class="built_in"> user </span><span class="builtin-name">set</span> <span class="attribute">host</span>=<span class="string">'%'</span> where<span class="built_in"> user </span>=<span class="string">'root'</span>;</span><br></pre></td></tr></table></figure>
 
 <ul>
