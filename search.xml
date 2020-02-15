@@ -123,7 +123,7 @@
 </ul>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ALTER USER <span class="string">'root'</span>@<span class="string">'localhost'</span> IDENTIFIED BY <span class="string">'Cn@12345678'</span>;</span><br></pre></td></tr></table></figure>
 
-<p>&emsp;&emsp;这里会遇到一个问题，mysql默认的密码规则必须包含特殊字符、大写字母、小写字母、数字、一定长度<br>并且对密码要求严格，至少8位，包含大小写等，</p>
+<p>&emsp;&emsp;<code>这里会遇到一个问题</code>，mysql默认的密码规则必须包含特殊字符、大写字母、小写字母、数字、一定长度<br>并且对密码要求严格，至少8位，包含大小写等，</p>
 <p>&emsp;&emsp;密码策略的所有参数</p>
 <figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SHOW</span> <span class="keyword">VARIABLES</span> <span class="keyword">LIKE</span> <span class="string">'validate_password%'</span>;</span><br><span class="line"><span class="keyword">show</span> <span class="keyword">variables</span> <span class="keyword">like</span> <span class="string">'%validate_password.policy%'</span>;</span><br><span class="line"><span class="keyword">show</span> <span class="keyword">variables</span> <span class="keyword">like</span> <span class="string">'%validate_password.length%'</span>;</span><br></pre></td></tr></table></figure>
 
