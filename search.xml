@@ -16,6 +16,7 @@
 <p>&emsp;&emsp;如果不存在（上面检查结果返回空）则跳过步骤</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">shell&gt; rpm -e --nodeps mariadb-server</span><br><span class="line">shell&gt; rpm -e --nodeps mariadb</span><br><span class="line">shell&gt; rpm -e --nodeps mariadb-libs</span><br></pre></td></tr></table></figure>
 
+
 <p>&emsp;&emsp;其实yum方式安装是可以不用删除mariadb的，安装MySQL会覆盖掉之前已存在的mariadb</p>
 <ul>
 <li>检查MySQL</li>
@@ -37,7 +38,7 @@
 <ul>
 <li>下载MySQL源</li>
 </ul>
-<p>官网地址：<a href="https://dev.mysql.com/downloads/repo/yum/" target="_blank" rel="noopener">https://dev.mysql.com/downloads/repo/yum/</a></p>
+<p>&emsp;&emsp;官网地址：<a href="https://dev.mysql.com/downloads/repo/yum/" target="_blank" rel="noopener">https://dev.mysql.com/downloads/repo/yum/</a></p>
 <ul>
 <li>查看系统版本：</li>
 </ul>
