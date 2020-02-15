@@ -248,7 +248,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2020-02-15 05:28:30 / 修改时间：17:53:57" itemprop="dateCreated datePublished" datetime="2020-02-15T05:28:30+08:00">2020-02-15</time>
+              <time title="创建时间：2020-02-15 05:28:30 / 修改时间：17:58:22" itemprop="dateCreated datePublished" datetime="2020-02-15T05:28:30+08:00">2020-02-15</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -274,144 +274,18 @@
 
       
           <h3 id="一、Linux下MySQL安装-YUM"><a href="#一、Linux下MySQL安装-YUM" class="headerlink" title="一、Linux下MySQL安装(YUM)"></a>一、Linux下MySQL安装(YUM)</h3><h4 id="1、检查并删除已经安装的MySql"><a href="#1、检查并删除已经安装的MySql" class="headerlink" title="1、检查并删除已经安装的MySql"></a>1、检查并删除已经安装的MySql</h4><ul>
-<li>检查MariaDB<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">shell&gt; rpm -qa|grep mariadb</span><br><span class="line">mariadb-server<span class="number">-5.5</span><span class="number">.60</span><span class="number">-1.</span>el7_5.x86_64</span><br><span class="line">mariadb<span class="number">-5.5</span><span class="number">.60</span><span class="number">-1.</span>el7_5.x86_64</span><br><span class="line">mariadb-libs<span class="number">-5.5</span><span class="number">.60</span><span class="number">-1.</span>el7_5.x86_64</span><br></pre></td></tr></table></figure></li>
-<li>删除mariadb</li>
-</ul>
-<p>&emsp;&emsp;如果不存在（上面检查结果返回空）则跳过步骤</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">shell&gt; rpm -e --nodeps mariadb-server</span><br><span class="line">shell&gt; rpm -e --nodeps mariadb</span><br><span class="line">shell&gt; rpm -e --nodeps mariadb-libs</span><br></pre></td></tr></table></figure>
-
-<p>&emsp;&emsp;其实yum方式安装是可以不用删除mariadb的，安装MySQL会覆盖掉之前已存在的mariadb</p>
-<ul>
-<li>检查MySQL</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell&gt; rpm -qa|grep mysql</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>删除MySQL</li>
-</ul>
-<p>如果不存在（上面检查结果返回空）则跳过步骤</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell&gt; rpm -e --nodeps xxx</span><br></pre></td></tr></table></figure>
-<p>或</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rpm -e --nodeps `rpm -qa | grep mysql`</span><br></pre></td></tr></table></figure>
-
-<h4 id="2、添加MySQL-Yum-Repository"><a href="#2、添加MySQL-Yum-Repository" class="headerlink" title="2、添加MySQL Yum Repository"></a>2、添加MySQL Yum Repository</h4><blockquote>
-<p>从CentOS 7开始，MariaDB成为Yum源中默认的数据库安装包。<br>也就是说在CentOS 7及以上的系统中使用yum安装MySQL默认安装的会是MariaDB（MySQL的一个分支）。<br>如果想安装官方MySQL版本，需要使用MySQL提供的Yum源。</p>
-</blockquote>
-<ul>
-<li>下载MySQL源</li>
-</ul>
-<p>官网地址：<a href="https://dev.mysql.com/downloads/repo/yum/" target="_blank" rel="noopener">https://dev.mysql.com/downloads/repo/yum/</a></p>
-<ul>
-<li>查看系统版本：</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">lsb_release -a   查看系统版本</span><br><span class="line">getconf LONG_BIT 查看系统位数</span><br><span class="line"></span><br><span class="line">查看系统版本</span><br><span class="line">cat /etc/redhat-release</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><p>选择对应的版本进行下载</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget https://repo.mysql.com//mysql80-community-release-el6-3.noarch.rpm</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>安装MySQL源</p>
-</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rpm -ivh  mysql80-community-release-el6-3.noarch.rpm</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>检查是否安装成功</li>
-</ul>
-<p>执行成功后会在<code>/etc/yum.repos.d/</code>目录下生成两个repo文件<code>mysql-community.repo</code>及 <code>mysql-community-source.repo</code></p>
-<p>并且通过yum repolist可以看到mysql相关资源</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">shell&gt; yum repolist enabled | grep <span class="string">"mysql.*-community.*"</span></span><br><span class="line">!mysql-connectors-community/x86_64 MySQL Connectors Community                108</span><br><span class="line">!mysql-tools-community/x86_64      MySQL Tools Community                      90</span><br><span class="line">!mysql80-community/x86_64          MySQL 8.0 Community Server                113</span><br></pre></td></tr></table></figure>
-
-<h4 id="3、选择MySQL版本"><a href="#3、选择MySQL版本" class="headerlink" title="3、选择MySQL版本"></a>3、选择MySQL版本</h4><blockquote>
-<p>使用MySQL Yum Repository安装MySQL，<br>默认会选择当前最新的稳定版本，例如通过上面的MySQL源进行安装的话，默安装会选择MySQL 8.0版本，<br>如果就是想要安装该版本，可以直接跳过此步骤，<br>如果不是，比如我这里希望安装MySQL5.7版本，就需要“切换一下版本”：</p>
-</blockquote>
-<ul>
-<li>查看当前MySQL Yum Repository中所有MySQL版本（每个版本在不同的子仓库中）</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell&gt; yum repolist all | grep mysql</span><br></pre></td></tr></table></figure>
-<ul>
-<li>切换版本</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">shell&gt; sudo yum-config-manager --<span class="built_in">disable</span> mysql80-community</span><br><span class="line">shell&gt; sudo yum-config-manager --<span class="built_in">enable</span> mysql57-community</span><br></pre></td></tr></table></figure>
-
-<p>除了使用yum-config-manager之外，还可以直接编辑<code>/etc/yum.repos.d/mysql-community.repo</code>文件</p>
-<p>enabled=0禁用</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[mysql80-community]</span><br><span class="line">name=MySQL 8.0 Community Server</span><br><span class="line">baseurl=http://repo.mysql.com/yum/mysql-8.0-community/el/7/<span class="variable">$basearch</span>/</span><br><span class="line">enabled=0</span><br><span class="line">gpgcheck=1</span><br><span class="line">gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-mysql</span><br></pre></td></tr></table></figure>
-
-<p>enabled=1启用</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Enable to use MySQL 5.7</span></span><br><span class="line">[mysql57-community]</span><br><span class="line">name=MySQL 5.7 Community Server</span><br><span class="line">baseurl=http://repo.mysql.com/yum/mysql-5.7-community/el/7/<span class="variable">$basearch</span>/</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=1</span><br><span class="line">gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-mysql</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>检查当前启用的MySQL仓库</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell&gt; yum repolist enabled | grep mysql</span><br></pre></td></tr></table></figure>
-
-<p>如果同时启用了多个仓库，安装时会选择最新版本</p>
-<h4 id="4、安装MySQL"><a href="#4、安装MySQL" class="headerlink" title="4、安装MySQL"></a>4、安装MySQL</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell&gt; sudo yum install mysql-community-server</span><br></pre></td></tr></table></figure>
-
-<p>该命令会安装MySQL服务器 (mysql-community-server) 及其所需的依赖、相关组件，包括mysql-community-client、mysql-community-common、mysql-community-libs等</p>
-<p>如果带宽不够，这个步骤时间会比较长，请耐心等待~</p>
-<p>或</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install mysql-server</span><br></pre></td></tr></table></figure>
-
-<h4 id="5、查询是否安装成功"><a href="#5、查询是否安装成功" class="headerlink" title="5、查询是否安装成功"></a>5、查询是否安装成功</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqladmin -V</span><br></pre></td></tr></table></figure>
-
-<h4 id="6、启动MySQL"><a href="#6、启动MySQL" class="headerlink" title="6、启动MySQL"></a>6、启动MySQL</h4><p>启动前<code>最好</code>修改<code>/etc/my.cnf</code>配置文件</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/my.cnf</span><br><span class="line"></span><br><span class="line"> 添加：</span><br><span class="line"></span><br><span class="line"><span class="comment"># leeze</span></span><br><span class="line">port = 3306</span><br><span class="line">character-set-server=utf8</span><br><span class="line"><span class="comment">#忘记密码时使用</span></span><br><span class="line"><span class="comment">#skip-grant-tables</span></span><br><span class="line"><span class="comment">#设置协议认证方式</span></span><br><span class="line">default_authentication_plugin=mysql_native_password</span><br></pre></td></tr></table></figure>
-
-
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell&gt; sudo service mysqld start</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>其他命令：</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">service mysqld status</span><br><span class="line">service mysqld stop</span><br><span class="line">service mysqld restart</span><br></pre></td></tr></table></figure>
-
-<h4 id="7、修改密码"><a href="#7、修改密码" class="headerlink" title="7、修改密码"></a>7、修改密码</h4><ul>
-<li>初始密码</li>
-</ul>
-<p>MySQL第一次启动后会创建超级管理员账号root@localhost，初始密码存储在日志文件中：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell&gt; sudo grep <span class="string">'temporary password'</span> /var/<span class="built_in">log</span>/mysqld.log</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>修改默认密码</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell&gt; mysql -uroot -p</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>修改密码<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALTER USER <span class="string">'root'</span>@<span class="string">'localhost'</span> IDENTIFIED BY <span class="string">'Cn@12345678'</span>;</span><br></pre></td></tr></table></figure>
+<li>检查MariaDB<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">shell&gt; rpm -qa|grep mariadb</span><br><span class="line">mariadb-server<span class="number">-5.5</span><span class="number">.60</span><span class="number">-1.</span>el7_5.x86_64</span><br><span class="line">mariadb<span class="number">-5.5</span><span class="number">.60</span><span class="number">-1.</span>el7_5.x86_64</span><br><span class="line">mariadb-libs<span class="number">-5.5</span><span class="number">.60</span><span class="number">-1.</span>el7_5.x86_64</span><br></pre></td></tr></table></figure>
 
 </li>
 </ul>
-<p>这里会遇到一个问题，mysql默认的密码规则必须包含特殊字符、大写字母、小写字母、数字、一定长度<br>并且对密码要求严格，至少8位，包含大小写等，</p>
-<p>密码策略的所有参数</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SHOW</span> <span class="keyword">VARIABLES</span> <span class="keyword">LIKE</span> <span class="string">'validate_password%'</span>;</span><br><span class="line"><span class="keyword">show</span> <span class="keyword">variables</span> <span class="keyword">like</span> <span class="string">'%validate_password.policy%'</span>;</span><br><span class="line"><span class="keyword">show</span> <span class="keyword">variables</span> <span class="keyword">like</span> <span class="string">'%validate_password.length%'</span>;</span><br></pre></td></tr></table></figure>
-
-<p>若想设置成123456，则要以下两条命令：</p>
-<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="builtin-name">set</span> global validate_password.<span class="attribute">policy</span>=0;  #设置为弱口令</span><br><span class="line"><span class="builtin-name">set</span> global validate_password.<span class="attribute">length</span>=1;  #密码最小长度为1</span><br><span class="line"></span><br><span class="line">alter<span class="built_in"> user </span>user() identified by <span class="string">'123456'</span>;</span><br></pre></td></tr></table></figure>
-
-
-<h4 id="8、允许root远程访问"><a href="#8、允许root远程访问" class="headerlink" title="8、允许root远程访问"></a>8、允许root远程访问</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#任何主机</span></span><br><span class="line">mysql&gt;GRANT ALL PRIVILEGES ON *.* TO <span class="string">'root'</span>@<span class="string">'%'</span> IDENTIFIED BY <span class="string">'root'</span> WITH GRANT OPTION;</span><br><span class="line"><span class="comment">#指定主机</span></span><br><span class="line">mysql&gt;GRANT ALL PRIVILEGES ON *.* TO <span class="string">'xxxx'</span>@’xx.xx.xx.xx’ IDENTIFIED BY <span class="string">'xxxx'</span> WITH GRANT OPTION;</span><br><span class="line"><span class="comment"># 然后刷新权限</span></span><br><span class="line">mysql&gt;flush privileges;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>首先查看用户表，</li>
-</ul>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">user</span>,host,<span class="keyword">plugin</span> <span class="keyword">from</span> <span class="keyword">user</span>;</span><br></pre></td></tr></table></figure>
-<p> 发现登录主机是localhost，当然不能登录，把root用户的localhost设置为%，这样任意主机都可以连接。</p>
-<p> 修改连接权限(%表示所有ip，如果只指定某台电脑，则改成相应的ip)</p>
-<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">update<span class="built_in"> user </span><span class="builtin-name">set</span> <span class="attribute">host</span>=<span class="string">'%'</span> where<span class="built_in"> user </span>=<span class="string">'root'</span>;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><p>更改加密方式</p>
-<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">update<span class="built_in"> user </span><span class="builtin-name">set</span> <span class="attribute">plugin</span>=<span class="string">'mysql_native_password'</span> where<span class="built_in"> user </span>=<span class="string">'root'</span>;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>授权远程连接</p>
-<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">grant</span> <span class="keyword">all</span> <span class="keyword">privileges</span> <span class="keyword">on</span> *.* <span class="keyword">to</span> root@<span class="string">'%'</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>执行刷新权限</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FLUSH</span> <span class="keyword">PRIVILEGES</span>;</span><br></pre></td></tr></table></figure></li>
-</ul>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/post/577cb4e8.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 

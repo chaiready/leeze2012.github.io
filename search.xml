@@ -4,7 +4,13 @@
     <title>CentOS 6 安装 MySQL 8.0.+</title>
     <url>/post/577cb4e8.html</url>
     <content><![CDATA[<h3 id="一、Linux下MySQL安装-YUM"><a href="#一、Linux下MySQL安装-YUM" class="headerlink" title="一、Linux下MySQL安装(YUM)"></a>一、Linux下MySQL安装(YUM)</h3><h4 id="1、检查并删除已经安装的MySql"><a href="#1、检查并删除已经安装的MySql" class="headerlink" title="1、检查并删除已经安装的MySql"></a>1、检查并删除已经安装的MySql</h4><ul>
-<li>检查MariaDB<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">shell&gt; rpm -qa|grep mariadb</span><br><span class="line">mariadb-server<span class="number">-5.5</span><span class="number">.60</span><span class="number">-1.</span>el7_5.x86_64</span><br><span class="line">mariadb<span class="number">-5.5</span><span class="number">.60</span><span class="number">-1.</span>el7_5.x86_64</span><br><span class="line">mariadb-libs<span class="number">-5.5</span><span class="number">.60</span><span class="number">-1.</span>el7_5.x86_64</span><br></pre></td></tr></table></figure></li>
+<li>检查MariaDB<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">shell&gt; rpm -qa|grep mariadb</span><br><span class="line">mariadb-server<span class="number">-5.5</span><span class="number">.60</span><span class="number">-1.</span>el7_5.x86_64</span><br><span class="line">mariadb<span class="number">-5.5</span><span class="number">.60</span><span class="number">-1.</span>el7_5.x86_64</span><br><span class="line">mariadb-libs<span class="number">-5.5</span><span class="number">.60</span><span class="number">-1.</span>el7_5.x86_64</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<a id="more"></a>
+
+<ul>
 <li>删除mariadb</li>
 </ul>
 <p>&emsp;&emsp;如果不存在（上面检查结果返回空）则跳过步骤</p>
