@@ -1,6 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>PHP7 安装 event 扩展</title>
+    <url>/post/c42ce648.html</url>
+    <content><![CDATA[<div class="note success no-icon">
+            <p>Libevent 是一个用C语言编写的、轻量级的开源高性能I/O框架，支持多种 I/O 多路复用技术： epoll、 poll、 dev/poll、 select 和 kqueue 等；支持 I/O，定时器和信号等事件；注册事件优先级。PHP提供了对应的扩展 libevent、 Event 。</p><p>相比 libevent ext, event ext 拥有更好的性能表现和更全面的API，可以让我们更友好的使用 Libevent。</p>
+          </div>
+
+<a id="more"></a>
+
+<h4 id="安装-Libevent-库"><a href="#安装-Libevent-库" class="headerlink" title="安装 Libevent 库"></a>安装 Libevent 库</h4><p>php event 扩展 依赖 Libevent 库，需要先编译安装（注意是 Libevent 库，非 libevent 扩展）。</p>
+<figure class="highlight jboss-cli"><table><tr><td class="code"><pre><span class="line">git clone <span class="params">--depth=1</span> https:<span class="string">//github.com/nmathewson/Libevent.git</span></span><br><span class="line"><span class="keyword">cd</span> Libevent</span><br><span class="line"><span class="string">./autogen.sh</span></span><br><span class="line"></span><br><span class="line"><span class="string">./configure</span> <span class="params">--prefix=/usr/local/libevent</span></span><br><span class="line">make &amp;&amp; make install</span><br></pre></td></tr></table></figure>
+
+<h4 id="安装-Event-扩展"><a href="#安装-Event-扩展" class="headerlink" title="安装 Event 扩展"></a>安装 Event 扩展</h4><p>可以直接使用 pecl 安装</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">pecl <span class="keyword">install</span> <span class="keyword">event</span></span><br><span class="line">downloading <span class="keyword">event</span><span class="number">-2.5</span><span class="number">.3</span>.tgz ...</span><br><span class="line"><span class="keyword">Starting</span> <span class="keyword">to</span> download <span class="keyword">event</span><span class="number">-2.5</span><span class="number">.3</span>.tgz (<span class="number">140</span>,<span class="number">913</span> <span class="keyword">bytes</span>)</span><br><span class="line">..............................done: <span class="number">140</span>,<span class="number">913</span> <span class="keyword">bytes</span></span><br><span class="line"><span class="number">50</span> <span class="keyword">source</span> files, building</span><br><span class="line">running: phpize</span><br><span class="line">Configuring <span class="keyword">for</span>:</span><br><span class="line">PHP Api <span class="keyword">Version</span>:         <span class="number">20180731</span></span><br><span class="line">Zend <span class="keyword">Module</span> Api <span class="keyword">No</span>:      <span class="number">20180731</span></span><br><span class="line">Zend Extension Api <span class="keyword">No</span>:   <span class="number">320180731</span></span><br><span class="line"><span class="keyword">Enable</span> internal debugging <span class="keyword">in</span> <span class="keyword">Event</span> [<span class="keyword">no</span>] : </span><br><span class="line"><span class="keyword">Enable</span> sockets support <span class="keyword">in</span> <span class="keyword">Event</span> [yes] : </span><br><span class="line">libevent installation prefix [/usr] : /usr/<span class="keyword">local</span>/libevent</span><br><span class="line">...</span><br><span class="line"><span class="keyword">Build</span> process completed successfully</span><br><span class="line">Installing <span class="string">'/usr/local/php/lib/php/extensions/no-debug-non-zts-20180731/event.so'</span></span><br><span class="line"><span class="keyword">install</span> ok: channel://pecl.php.net/<span class="keyword">event</span><span class="number">-2.5</span><span class="number">.3</span></span><br><span class="line">Extension <span class="keyword">event</span> enabled <span class="keyword">in</span> php.ini</span><br></pre></td></tr></table></figure>
+
+
+
+<p>查看安装结果</p>
+<figure class="highlight elm"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]# php <span class="comment">--ri event</span></span><br><span class="line"></span><br><span class="line"><span class="title">event</span></span><br><span class="line"></span><br><span class="line"><span class="type">Event</span> sup<span class="keyword">port</span> =&gt; enabled</span><br><span class="line"><span class="type">Sockets</span> sup<span class="keyword">port</span> =&gt; enabled</span><br><span class="line"><span class="type">Debug</span> sup<span class="keyword">port</span> =&gt; disabled</span><br><span class="line"><span class="type">Extra</span> functionality sup<span class="keyword">port</span> including HTTP, DNS, and RPC =&gt; enabled</span><br><span class="line"><span class="type">OpenSSL</span> sup<span class="keyword">port</span> =&gt; enabled</span><br><span class="line"><span class="type">Thread</span> safety sup<span class="keyword">port</span> =&gt; disabled</span><br><span class="line"><span class="type">Extension</span> version =&gt; <span class="number">2.5</span><span class="number">.3</span></span><br><span class="line"><span class="title">libevent2</span> headers version =&gt; <span class="number">2.2</span><span class="number">.0</span>-alpha-dev</span><br></pre></td></tr></table></figure>
+
+<h4 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h4><p>1,<code>问题</code>，<code>pecl install event</code>连不上，下载失败。</p>
+<figure class="highlight css"><table><tr><td class="code"><pre><span class="line"><span class="selector-tag">pecl</span> <span class="selector-tag">channel-update</span> <span class="selector-tag">pecl</span><span class="selector-class">.php</span><span class="selector-class">.net</span></span><br></pre></td></tr></table></figure>
+
+<p>2,<code>问题</code>，<code>pecl channel-update pecl.php.net 失败</code></p>
+<figure class="highlight subunit"><table><tr><td class="code"><pre><span class="line">pecl channel-update pecl.php.net</span><br><span class="line"></span><br><span class="line">Updating channel "pecl.php.net"</span><br><span class="line"><span class="keyword">Error: </span>No version number found in &lt;channel&gt; tag</span><br><span class="line">Invalid channel.xml file</span><br></pre></td></tr></table></figure>
+
+<p>解决方案：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pecl channel-update https://pecl.php.net/channel.xml</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>Linux</tag>
+        <tag>PHP</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>CentOS 6 安装 MySQL 8.0.+</title>
     <url>/post/577cb4e8.html</url>
     <content><![CDATA[<h3 id="一、Linux下MySQL安装-YUM"><a href="#一、Linux下MySQL安装-YUM" class="headerlink" title="一、Linux下MySQL安装(YUM)"></a>一、Linux下MySQL安装(YUM)</h3><h4 id="1、检查并删除已经安装的MySql"><a href="#1、检查并删除已经安装的MySql" class="headerlink" title="1、检查并删除已经安装的MySql"></a>1、检查并删除已经安装的MySql</h4><ul>
