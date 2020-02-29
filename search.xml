@@ -4,9 +4,18 @@
     <title>Meting漂亮的背景音乐播放器</title>
     <url>/post/c1dab809.html</url>
     <content><![CDATA[<div class="note success no-icon">
-            <p>&emsp;&emsp;以前就很想给网站加上一个背景音乐播放器！并且这个播放器要简洁大气，Meting完美的阐释了这句话！</p>
+            <p>&emsp;以前就很想给网站加上一个背景音乐播放器！并且这个播放器要简洁大气，Meting完美的阐释了这句话！</p>
           </div>
 
+
+
+<!-- require APlayer -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
+<script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
+<!-- require MetingJS -->
+<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+
+<p><meting-js server="netease" type="playlist" list-folded="true" theme="#eb7aab" id="14721111"><br></meting-js></p>
 <a id="more"></a>
 
 <p>&emsp;&emsp;在Github的开源地址：<a href="https://github.com/metowolf/MetingJS" target="_blank" rel="noopener">https://github.com/metowolf/MetingJS</a></p>
@@ -15,13 +24,18 @@
 <br>
 
 <p>&emsp;&emsp;这样你的网站就会有一个在左下角收缩的播放器了！如果你想换歌单可以在meting-js标签中修改id属性！这样就完成了是不是很简单！</p>
-<!-- require APlayer -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
-<script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
-<!-- require MetingJS -->
-<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+<link rel="stylesheet" href="https://npm.elemecdn.com/aplayer@1.10.1/dist/APlayer.min.css">
+<script src="https://npm.elemecdn.com/aplayer@1.10.1/dist/APlayer.min.js"></script>
+<script src="https://npm.elemecdn.com/meting@2.0.1/dist/Meting.min.js"></script>
+<script>var meting_api = 'https://service-opb3o3ky-1251733603.gz.apigw.tencentcs.com/release/Meting?server=:server&type=:type&id=:id&r=:r';</script>
+<meting-js auto="https://music.163.com/#/playlist?id=14721111" order="random" theme="#0073aa" list-folded="true"></meting-js>
 
-<p><meting-js server="netease" type="playlist" list-folded="true" id="14721111"><br></meting-js></p>
+<br>
+<br>
+
+<blockquote>
+<p>其他播放器<br><a href="https://yy.mosq.cn" target="_blank" rel="noopener">漫音乐播放器</a></p>
+</blockquote>
 ]]></content>
       <categories>
         <category>JavaScript</category>
