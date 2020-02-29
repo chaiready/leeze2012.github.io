@@ -1,6 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Meting漂亮的背景音乐播放器</title>
+    <url>/post/c1dab809.html</url>
+    <content><![CDATA[<div class="note success no-icon">
+            <p>&emsp;&emsp;以前就很想给网站加上一个背景音乐播放器！并且这个播放器要简洁大气，Meting完美的阐释了这句话！</p>
+          </div>
+
+<a id="more"></a>
+
+<p>&emsp;&emsp;在Github的开源地址：<a href="https://github.com/metowolf/MetingJS" target="_blank" rel="noopener">https://github.com/metowolf/MetingJS</a></p>
+<p>&emsp;&emsp;如果你想在你的网站上添加Meting你可以这么做，找到一个公共的页面在底部添加上下面的代码:</p>
+<figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">&lt;link <span class="attribute">rel</span>=<span class="string">"stylesheet"</span> <span class="attribute">href</span>=<span class="string">"https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css"</span>&gt;</span><br><span class="line">&lt;script <span class="attribute">src</span>=<span class="string">"https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"</span>&gt;&lt;/script&gt;</span><br><span class="line">&lt;script <span class="attribute">src</span>=<span class="string">"https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"</span>&gt;&lt;/script&gt;</span><br><span class="line">&lt;meting-js <span class="attribute">server</span>=<span class="string">"netease"</span> <span class="attribute">type</span>=<span class="string">"playlist"</span> <span class="attribute">id</span>=<span class="string">"2287227122"</span> <span class="attribute">fixed</span>=<span class="string">"true"</span> <span class="attribute">autoplay</span>=<span class="string">"false"</span> <span class="attribute">order</span>=<span class="string">"random"</span> <span class="attribute">theme</span>=<span class="string">"#eb7aab"</span>&gt;&lt;/meting-js&gt;</span><br></pre></td></tr></table></figure>
+<br>
+
+<p>&emsp;&emsp;这样你的网站就会有一个在左下角收缩的播放器了！如果你想换歌单可以在meting-js标签中修改id属性！这样就完成了是不是很简单！</p>
+<!-- require APlayer -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
+<script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
+<!-- require MetingJS -->
+<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+
+<p><meting-js server="netease" type="playlist" list-folded="true" id="14721111"><br></meting-js></p>
+]]></content>
+      <categories>
+        <category>JavaScript</category>
+      </categories>
+      <tags>
+        <tag>Meting</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>linux搭建GitLab</title>
     <url>/post/73879c7f.html</url>
     <content><![CDATA[<h3 id="1-初始GitLab"><a href="#1-初始GitLab" class="headerlink" title="1.初始GitLab"></a>1.初始GitLab</h3><p>&emsp;&emsp;GitLab是利用Ruby on Rails一个开源的版本管理系统，实现一个自托管的Git项目仓库，可通过Web界面进行访问公开的或者私人项目。<br>&emsp;&emsp;与Github类似，GitLab能够浏览源代码，管理缺陷和注释。可以管理团队对仓库的访问，它非常易于浏览提交过的版本并提供一个文件历史库。团队成员可以利用内置的简单聊天程序(Wall)进行交流。<br>&emsp;&emsp;它还提供一个代码片段收集功能可以轻松实现代码复用，便于日后有需要的时候进行查找。</p>
