@@ -654,8 +654,10 @@ ok，完成！
 <h5 id="2，提交记录"><a href="#2，提交记录" class="headerlink" title="2，提交记录"></a>2，提交记录</h5><figure class="highlight dockerfile"><table><tr><td class="code"><pre><span class="line">git <span class="keyword">add</span><span class="bash"> _config.yml</span></span><br><span class="line">git commit -m <span class="string">"冲突处理"</span></span><br></pre></td></tr></table></figure>
 
 <h5 id="3，在更新"><a href="#3，在更新" class="headerlink" title="3，在更新"></a>3，在更新</h5><figure class="highlight ebnf"><table><tr><td class="code"><pre><span class="line"><span class="attribute">git pull</span></span><br></pre></td></tr></table></figure>
-<blockquote class="blockquote-center"><p>主题升级成功。</p>
-</blockquote>]]></content>
+<blockquote class="blockquote-center">
+            <p>主题升级成功。</p>
+
+          </blockquote>]]></content>
       <categories>
         <category>hexo建站</category>
       </categories>
@@ -1193,8 +1195,10 @@ Node.js</code></pre><h4 id="Hexo安装：npm-install-hexo-g"><a href="#Hexo安�
 <p>下面用菜根谭中一段做例<br>&emsp;&emsp;好丑心太明，则物不契；贤愚心太明，则人不亲。士君子须是内精明而外浑厚，使好丑两得其平，贤愚共受其益，才是生成的德量。</p>
 <a id="more"></a>
 
-<h4 id="文本局中"><a href="#文本局中" class="headerlink" title="文本局中"></a>文本局中</h4><blockquote class="blockquote-center"><p>夜宿山寺<br>唐 · 李白<br>危楼高百尺，手可摘星辰。<br>不敢高声语，恐惊天上人。</p>
-</blockquote>
+<h4 id="文本局中"><a href="#文本局中" class="headerlink" title="文本局中"></a>文本局中</h4><blockquote class="blockquote-center">
+            <p>夜宿山寺<br>唐 · 李白<br>危楼高百尺，手可摘星辰。<br>不敢高声语，恐惊天上人。</p>
+
+          </blockquote>
 
 <h4 id="插入图片"><a href="#插入图片" class="headerlink" title="插入图片"></a>插入图片</h4><figure class="highlight less"><table><tr><td class="code"><pre><span class="line">!<span class="selector-attr">[]</span>(images/<span class="number">1</span>.jpg)</span><br></pre></td></tr></table></figure>
 
@@ -1238,11 +1242,17 @@ Node.js</code></pre><h4 id="Hexo安装：npm-install-hexo-g"><a href="#Hexo安�
 
 <h4 id="按钮"><a href="#按钮" class="headerlink" title="按钮"></a>按钮</h4><figure class="highlight django"><table><tr><td class="code"><pre><span class="line"><span class="template-tag">&#123;% <span class="name">button</span> #, 开始 %&#125;</span></span><br></pre></td></tr></table></figure>
 
-<a class="btn" href="#">开始</a>
+<a class="btn" href="#">
+            开始
+          </a>
 
 <figure class="highlight django"><table><tr><td class="code"><pre><span class="line"><span class="template-tag">&#123;% <span class="name">btn</span> #, Text %&#125;</span><span class="xml"> </span><span class="template-tag">&#123;% <span class="name">btn</span> #, 取消,, Title %&#125;</span></span><br></pre></td></tr></table></figure>
 
-<a class="btn" href="#">Text</a> <a class="btn" href="#" title="Title">取消</a>
+<a class="btn" href="#">
+            Text
+          </a> <a class="btn" href="#" title="Title">
+            取消
+          </a>
 
 
 <figure class="highlight django"><table><tr><td class="code"><pre><span class="line"><span class="template-tag">&#123;% <span class="name">button</span> url, text, icon [class], [title] %&#125;</span></span><br><span class="line"><span class="xml"><span class="comment">&lt;!-- 标签别名 --&gt;</span></span></span><br><span class="line"><span class="template-tag">&#123;% <span class="name">btn</span> url, text, icon [class], [title] %&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="xml">url     : 绝对或相对URL</span></span><br><span class="line"><span class="xml">text    : 按钮文字，如果未指定图标则为必须</span></span><br><span class="line"><span class="xml">icon    : FontAwesome图标名称（开头没有'fa-'）。如果未指定文本，则为必需</span></span><br><span class="line"><span class="xml">[class] : FontAwesome类：fa-fw | fa-lg | fa-2x | fa-3x | fa-4x | fa-5X ，可选参数。</span></span><br><span class="line"><span class="xml">[title] : 鼠标悬停时的工具提示，可选参数。</span></span><br></pre></td></tr></table></figure>
@@ -1251,7 +1261,9 @@ Node.js</code></pre><h4 id="Hexo安装：npm-install-hexo-g"><a href="#Hexo安�
 <p>最好添加<code>&lt;div&gt;标签</code>，测试时没加div，下面显示不完全，加上非常美观。</p>
 <figure class="highlight django"><table><tr><td class="code"><pre><span class="line"><span class="xml"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span><span class="template-tag">&#123;% <span class="name">btn</span> https://www.zhyong.cn ,首页,home fa-2x,这是YouForever的首页%&#125;</span><span class="xml"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br></pre></td></tr></table></figure>
 <p>显示：</p>
-<div><a class="btn" href="https://blog.xiaosige.com/" title="这是leeze的首页"><i class="fa fa-home fa-fw"></i>首页</a></div>
+<div><a class="btn" href="https://blog.xiaosige.com/" title="这是leeze的首页">
+            <i class="fa fa-home fa-fw"></i>首页
+          </a></div>
 
 
 <h4 id="标签"><a href="#标签" class="headerlink" title="标签"></a>标签</h4><figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">&#123;% label [class]@Text %&#125;</span><br><span class="line"></span><br><span class="line">[class] :<span class="built_in"> default </span>| primary | success | <span class="builtin-name">info</span> | <span class="builtin-name">warning</span> | danger.</span><br><span class="line">          <span class="string">'@Text'</span> 可以指定是否有空格</span><br><span class="line">          例如。 <span class="string">'success @text'</span>类似于<span class="string">'success @ text'</span>。</span><br><span class="line">          如果未指定，则将选择默认类。</span><br></pre></td></tr></table></figure>

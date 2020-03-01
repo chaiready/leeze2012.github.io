@@ -16,36 +16,10 @@
 <link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
   <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
 
-
 <script id="hexo-configurations">
-  var NexT = window.NexT || {};
-  var CONFIG = {
-    hostname: new URL('https://blog.xiaosige.com').hostname,
-    root: '/',
-    scheme: 'Gemini',
-    version: '7.7.0',
-    exturl: false,
-    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
-    copycode: {"enable":true,"show_result":true,"style":"mac"},
-    back2top: {"enable":true,"sidebar":true,"scrollpercent":true},
-    bookmark: {"enable":true,"color":"#222","save":"auto"},
-    fancybox: true,
-    mediumzoom: false,
-    lazyload: false,
-    pangu: false,
-    comments: {"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},
-    algolia: {
-      appID: '',
-      apiKey: '',
-      indexName: '',
-      hits: {"per_page":10},
-      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
-    },
-    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},
-    path: 'search.xml',
-    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
-  };
-</script>
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.xiaosige.com","root":"/","scheme":"Gemini","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
 
   <meta name="description" content="修改[Read More]按钮样式 修改themes&#x2F;next&#x2F;source&#x2F;css&#x2F;_custom&#x2F;custom.styl文件，加入自定义样式">
 <meta property="og:type" content="article">
@@ -67,8 +41,8 @@
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome: false,
-    isPost: true
+    isHome : false,
+    isPost : true
   };
 </script>
 
@@ -111,6 +85,14 @@
 
     <header class="header" itemscope itemtype="http://schema.org/WPHeader">
       <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
   <div class="site-meta">
 
     <div>
@@ -123,11 +105,9 @@
         <p class="site-subtitle">心之所愿，无所不至！</p>
   </div>
 
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
     </div>
   </div>
 </div>
@@ -190,9 +170,9 @@
     <i class="fa fa-search"></i>
   </span>
   <div class="search-input-container">
-    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
            placeholder="搜索..." spellcheck="false"
-           type="text" id="search-input">
+           type="search" class="search-input">
   </div>
   <span class="popup-btn-close">
     <i class="fa fa-times-circle"></i>
@@ -264,9 +244,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/hexo%E5%BB%BA%E7%AB%99/" itemprop="url" rel="index">
-                    <span itemprop="name">hexo建站</span>
-                  </a>
+                  <a href="/categories/hexo%E5%BB%BA%E7%AB%99/" itemprop="url" rel="index"><span itemprop="name">hexo建站</span></a>
                 </span>
             </span>
 
@@ -500,9 +478,12 @@
     <i class="fa fa-user"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">小四儿(Leeze)工作室</span>
-
-
 </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.7.1
+  </div>
 
 <div>
 <!-- 网站运行时间的设置 -->
@@ -526,7 +507,6 @@ setInterval("createtime()",250);
 </script>
 </div>
 
-
         
 <div class="busuanzi-count">
   <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
@@ -535,7 +515,7 @@ setInterval("createtime()",250);
         <i class="fa fa-user"></i>
       </span>
       <span class="site-uv" title="总访客量">
-        <span id="busuanzi_value_site_uv"></span> 位访客
+        <span id="busuanzi_value_site_uv"></span>
       </span>
     </span>
     <span class="post-meta-divider">|</span>
@@ -544,7 +524,7 @@ setInterval("createtime()",250);
         <i class="fa fa-eye"></i>
       </span>
       <span class="site-pv" title="总访问量">
-        <span id="busuanzi_value_site_pv"></span> 次访问
+        <span id="busuanzi_value_site_pv"></span>
       </span>
     </span>
 </div>
@@ -606,14 +586,14 @@ if (document.querySelectorAll('div.pdf').length) {
     document.querySelectorAll('div.pdf').forEach(element => {
       PDFObject.embed(element.getAttribute('target'), element, {
         pdfOpenParams: {
-          navpanes: 0,
-          toolbar: 0,
+          navpanes : 0,
+          toolbar  : 0,
           statusbar: 0,
-          pagemode: 'thumbs',
-          view: 'FitH'
+          pagemode : 'thumbs',
+          view     : 'FitH'
         },
         PDFJS_URL: '/lib/pdf/web/viewer.html',
-        height: element.getAttribute('height') || '500px'
+        height   : element.getAttribute('height') || '500px'
       });
     });
   }, window.PDFObject);
@@ -633,12 +613,12 @@ if (document.querySelectorAll('div.pdf').length) {
 NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
   NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
     var gitalk = new Gitalk({
-      clientID: '0bf811e9556c918d4fc0',
+      clientID    : '0bf811e9556c918d4fc0',
       clientSecret: 'c54f979cd4e37f92b77fdc11e465dec81b90b7a3',
-      repo: 'leeze2012.github.io',
-      owner: 'leeze2012',
-      admin: ['leeze2012'],
-      id: 'b9cc85b937f8f6489b4ed36f2b07a91d',
+      repo        : 'leeze2012.github.io',
+      owner       : 'leeze2012',
+      admin       : ['leeze2012'],
+      id          : 'b9cc85b937f8f6489b4ed36f2b07a91d',
         language: 'zh-CN',
       distractionFreeMode: true
     });
